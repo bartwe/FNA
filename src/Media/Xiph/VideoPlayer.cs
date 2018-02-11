@@ -24,7 +24,7 @@ namespace Microsoft.Xna.Framework.Media
 		#region Hardware-accelerated YUV -> RGBA
 
 		private Effect shaderProgram;
-		private MojoShader.MOJOSHADER_effectStateChanges changes = new MojoShader.MOJOSHADER_effectStateChanges();
+		private IntPtr /*MojoShader.MOJOSHADER_effectStateChanges* */ changes;
 		private Texture2D[] yuvTextures = new Texture2D[3];
 		private Viewport viewport;
 
@@ -140,10 +140,10 @@ namespace Microsoft.Xna.Framework.Media
 			viewport = new Viewport(0, 0, width, height);
 		}
 
-		private void GL_pushState()
+		private unsafe void GL_pushState()
 		{
 			// Begin the effect, flagging to restore previous state on end
-			currentDevice.GLDevice.BeginPassRestore(shaderProgram.glEffect, ref changes);
+			currentDevice.GLDevice.BeginPassRestore(shaderProgram.glEffect, (MojoShader.MOJOSHADER_effectStateChanges*)changes);
 
 			// Prep our samplers
 			for (int i = 0; i < 3; i += 1)
@@ -392,7 +392,7 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Public Methods: XNA VideoPlayer Implementation
 
-		public VideoPlayer()
+		public unsafe VideoPlayer()
 		{
 			// Initialize public members.
 			IsDisposed = false;
@@ -404,9 +404,12 @@ namespace Microsoft.Xna.Framework.Media
 			// Initialize private members.
 			timer = new Stopwatch();
 			videoTexture = new RenderTargetBinding[1];
+
+			changes = Marshal.AllocHGlobal(sizeof(MojoShader.MOJOSHADER_effectStateChanges));
+			*((MojoShader.MOJOSHADER_effectStateChanges*)changes) = new MojoShader.MOJOSHADER_effectStateChanges();
 		}
 
-		public void Dispose()
+		public unsafe void Dispose()
 		{
 			// Stop the VideoPlayer. This gets almost everything...
 			Stop();
@@ -429,6 +432,11 @@ namespace Microsoft.Xna.Framework.Media
 			{
 				free(yuvData);
 				yuvData = IntPtr.Zero;
+			}
+
+			if (changes != IntPtr.Zero) {
+				Marshal.FreeHGlobal(changes);
+				changes = IntPtr.Zero;
 			}
 
 			// Okay, we out.

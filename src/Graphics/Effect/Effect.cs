@@ -24,10 +24,16 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
+				if (IsDisposed)
+					throw new ObjectDisposedException("Effect");
+
 				return INTERNAL_currentTechnique;
 			}
 			set
 			{
+				if (IsDisposed)
+					throw new ObjectDisposedException("Effect");
+
 				MojoShader.MOJOSHADER_effectSetTechnique(
 					glEffect.EffectData,
 					value.TechniquePointer
@@ -38,14 +44,34 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public EffectParameterCollection Parameters
 		{
-			get;
-			private set;
+			get { 
+				if (IsDisposed)
+					throw new ObjectDisposedException("Effect");
+				return _parameters;
+			}
+
+			private set {
+				if (IsDisposed)
+					throw new ObjectDisposedException("Effect");
+				_parameters = value;
+			}
+
 		}
 
+		EffectTechniqueCollection _techniques;
 		public EffectTechniqueCollection Techniques
 		{
-			get;
-			private set;
+			get {
+				if (IsDisposed)
+					throw new ObjectDisposedException("Effect");
+				return _techniques;
+			}
+
+			private set {
+				if (IsDisposed)
+					throw new ObjectDisposedException("Effect");
+                                _techniques = value;
+			}
 		}
 
 		#endregion
@@ -59,8 +85,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
-		private MojoShader.MOJOSHADER_effectStateChanges stateChanges;
-		private GCHandle stateChangesHandle;
+
+		private unsafe MojoShader.MOJOSHADER_effectStateChanges* stateChanges;
 
 		#endregion
 
@@ -236,11 +262,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT		// TextureFilter.MinPointMagLinearMipPoint
 		};
 
+		EffectParameterCollection _parameters;
+
 		#endregion
 
 		#region Public Constructor
 
-		public Effect(GraphicsDevice graphicsDevice, byte[] effectCode)
+		public unsafe Effect(GraphicsDevice graphicsDevice, byte[] effectCode)
 		{
 			GraphicsDevice = graphicsDevice;
 
@@ -254,18 +282,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			CurrentTechnique = Techniques[0];
 
 			// Pin the state changes so .NET doesn't move it around
-			stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
-			stateChanges.render_state_change_count = 0;
-			stateChanges.sampler_state_change_count = 0;
-			stateChanges.vertex_sampler_state_change_count = 0;
-			stateChangesHandle = GCHandle.Alloc(stateChanges, GCHandleType.Pinned);
+			stateChanges = (MojoShader.MOJOSHADER_effectStateChanges*)Marshal.AllocHGlobal(sizeof(MojoShader.MOJOSHADER_effectStateChanges));
+
+			*stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
+			stateChanges->render_state_change_count = 0;
+			stateChanges->sampler_state_change_count = 0;
+			stateChanges->vertex_sampler_state_change_count = 0;
 		}
 
 		#endregion
 
 		#region Protected Constructor
 
-		protected Effect(Effect cloneSource)
+		protected unsafe Effect(Effect cloneSource)
 		{
 			GraphicsDevice = cloneSource.GraphicsDevice;
 
@@ -287,11 +316,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			// Pin the state changes so .NET doesn't move it around
-			stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
-			stateChanges.render_state_change_count = 0;
-			stateChanges.sampler_state_change_count = 0;
-			stateChanges.vertex_sampler_state_change_count = 0;
-			stateChangesHandle = GCHandle.Alloc(stateChanges, GCHandleType.Pinned);
+			stateChanges = (MojoShader.MOJOSHADER_effectStateChanges*)Marshal.AllocHGlobal(sizeof(MojoShader.MOJOSHADER_effectStateChanges));
+
+			*stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
+			stateChanges->render_state_change_count = 0;
+			stateChanges->sampler_state_change_count = 0;
+			stateChanges->vertex_sampler_state_change_count = 0;
 		}
 
 		#endregion
@@ -310,21 +340,25 @@ namespace Microsoft.Xna.Framework.Graphics
 		protected override void Dispose(bool disposing)
 		{
 			if (!IsDisposed)
-			{
-				if (glEffect != null)
-				{
-					GraphicsDevice.GLDevice.AddDisposeEffect(glEffect);
+				unsafe {
+					if (glEffect != null) {
+						GraphicsDevice.GLDevice.AddDisposeEffect(glEffect);
+					}
+					var stateChangesIntPtr = (IntPtr)stateChanges;
+					if (stateChangesIntPtr != IntPtr.Zero) {
+						Marshal.FreeHGlobal(stateChangesIntPtr);
+						stateChangesIntPtr = IntPtr.Zero;
+						stateChanges = (MojoShader.MOJOSHADER_effectStateChanges*)stateChangesIntPtr;
+					}
 				}
-				if (stateChangesHandle.IsAllocated)
-				{
-					stateChangesHandle.Free();
-				}
-			}
 			base.Dispose(disposing);
 		}
 
 		protected internal virtual void OnApply()
 		{
+			if (IsDisposed)
+				throw new ObjectDisposedException("Effect");
+
 		}
 
 		#endregion
@@ -333,18 +367,21 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		internal unsafe void INTERNAL_applyEffect(uint pass)
 		{
+			if (IsDisposed)
+				throw new ObjectDisposedException("Effect");
+
 			GraphicsDevice.GLDevice.ApplyEffect(
 				glEffect,
 				CurrentTechnique.TechniquePointer,
 				pass,
-				ref stateChanges
+				stateChanges
 			);
 			/* FIXME: Does this actually affect the XNA variables?
 			 * There's a chance that the D3DXEffect calls do this
 			 * behind XNA's back, even.
 			 * -flibit
 			 */
-			if (stateChanges.render_state_change_count > 0)
+			if (stateChanges->render_state_change_count > 0)
 			{
 				// Used to avoid redundant device state application
 				bool blendStateChanged = false;
@@ -407,8 +444,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				bool scissorTestEnable = oldRasterizerState.ScissorTestEnable;
 				float slopeScaleDepthBias = oldRasterizerState.SlopeScaleDepthBias;
 
-				MojoShader.MOJOSHADER_effectState* states = (MojoShader.MOJOSHADER_effectState*) stateChanges.render_state_changes;
-				for (int i = 0; i < stateChanges.render_state_change_count; i += 1)
+				MojoShader.MOJOSHADER_effectState* states = (MojoShader.MOJOSHADER_effectState*) stateChanges->render_state_changes;
+				for (int i = 0; i < stateChanges->render_state_change_count; i += 1)
 				{
 					MojoShader.MOJOSHADER_renderStateType type = states[i].type;
 					if (	type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_VERTEXSHADER ||
@@ -757,20 +794,20 @@ namespace Microsoft.Xna.Framework.Graphics
 					GraphicsDevice.RasterizerState = newRasterizer;
 				}
 			}
-			if (stateChanges.sampler_state_change_count > 0)
+			if (stateChanges->sampler_state_change_count > 0)
 			{
 				INTERNAL_updateSamplers(
-					stateChanges.sampler_state_change_count,
-					(MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.sampler_state_changes,
+					stateChanges->sampler_state_change_count,
+					(MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges->sampler_state_changes,
 					GraphicsDevice.Textures,
 					GraphicsDevice.SamplerStates
 				);
 			}
-			if (stateChanges.vertex_sampler_state_change_count > 0)
+			if (stateChanges->vertex_sampler_state_change_count > 0)
 			{
 				INTERNAL_updateSamplers(
-					stateChanges.vertex_sampler_state_change_count,
-					(MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.vertex_sampler_state_changes,
+					stateChanges->vertex_sampler_state_change_count,
+					(MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges->vertex_sampler_state_changes,
 					GraphicsDevice.VertexTextures,
 					GraphicsDevice.VertexSamplerStates
 				);
@@ -783,6 +820,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			TextureCollection textures,
 			SamplerStateCollection samplers
 		) {
+			if (IsDisposed)
+				throw new ObjectDisposedException("Effect");
 			for (int i = 0; i < changeCount; i += 1)
 			{
 				if (registers[i].sampler_state_count == 0)
@@ -1020,6 +1059,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private unsafe void INTERNAL_parseEffectStruct()
 		{
+			if (IsDisposed)
+				throw new ObjectDisposedException("Effect");
+
 			MojoShader.MOJOSHADER_effect* effectPtr = (MojoShader.MOJOSHADER_effect*) glEffect.EffectData;
 
 			// Set up Parameters
@@ -1158,6 +1200,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr rawAnnotations,
 			uint numAnnotations
 		) {
+			if (IsDisposed)
+				throw new ObjectDisposedException("Effect");
+
 			MojoShader.MOJOSHADER_effectAnnotation* annoPtr = (MojoShader.MOJOSHADER_effectAnnotation*) rawAnnotations;
 			List<EffectAnnotation> annotations = new List<EffectAnnotation>((int) numAnnotations);
 			for (int i = 0; i < numAnnotations; i += 1)

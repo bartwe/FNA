@@ -335,15 +335,17 @@ namespace Microsoft.Xna.Framework.Graphics
 		IGLEffect CreateEffect(byte[] effectCode);
 		IGLEffect CloneEffect(IGLEffect effect);
 		void AddDisposeEffect(IGLEffect effect);
-		void ApplyEffect(
+
+		unsafe void ApplyEffect(
 			IGLEffect effect,
 			IntPtr technique,
 			uint pass,
-			ref MojoShader.MOJOSHADER_effectStateChanges stateChanges
+			MojoShader.MOJOSHADER_effectStateChanges* stateChanges
 		);
-		void BeginPassRestore(
+
+		unsafe void BeginPassRestore(
 			IGLEffect effect,
-			ref MojoShader.MOJOSHADER_effectStateChanges changes
+			MojoShader.MOJOSHADER_effectStateChanges* changes
 		);
 		void EndPassRestore(IGLEffect effect);
 
