@@ -6,7 +6,7 @@
 	url = git://github.com/flibitijibibo/OpenAL-CS.git
 [submodule "lib/MojoShader-CS"]
 	path = lib/MojoShader-CS
-	url = git://github.com/flibitijibibo/MojoShader-CS.git
+	url = git://github.com/bartwe/MojoShader-CS.git
 [submodule "lib/Vorbisfile-CS"]
 	path = lib/Vorbisfile-CS
 	url = git://github.com/flibitijibibo/Vorbisfile-CS.git
