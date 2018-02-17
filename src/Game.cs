@@ -560,6 +560,7 @@ namespace Microsoft.Xna.Framework
 		{
 			if (isInTickCall)
 				return;
+			isInTickCall = true;
 			/* Draw/EndDraw should not be called if BeginDraw returns false.
 			 * http://stackoverflow.com/questions/4054936/manual-control-over-when-to-redraw-the-screen/4057180#4057180
 			 * http://stackoverflow.com/questions/4235439/xna-3-1-to-4-0-requires-constant-redraw-or-will-display-a-purple-screen
@@ -572,6 +573,7 @@ namespace Microsoft.Xna.Framework
 				Draw(new GameTime(gameTime.TotalGameTime, TimeSpan.Zero));
 				EndDraw();
 			}
+			isInTickCall = false;
 		}
 
 		#endregion
