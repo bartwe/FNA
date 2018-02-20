@@ -299,6 +299,8 @@ namespace Microsoft.Xna.Framework
 
 		public void Dispose()
 		{
+            // do not cause reentrancy while disposing
+            isInTickCall = true;
 			Dispose(true);
 			GC.SuppressFinalize(this);
 			if (Disposed != null)
