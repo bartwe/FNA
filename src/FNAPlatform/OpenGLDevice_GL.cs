@@ -871,6 +871,22 @@ namespace Microsoft.Xna.Framework.Graphics
 		/* END STRING MARKER FUNCTIONS */
 #endif
 
+		Delegate GetDelegateFromSDL(string procName, Type type) {
+			var proc = SDL.SDL_GL_GetProcAddress(procName);
+			if (proc == IntPtr.Zero)
+				throw new Exception("Failed to load SDL_GL proc :"+procName);
+			return Marshal.GetDelegateForFunctionPointer(proc, type);
+		}
+
+		Delegate GetDelegateFromSDLEXT(string procName, Type type, string ext = "EXT") {
+			var proc = SDL.SDL_GL_GetProcAddress(procName);
+			if (proc == IntPtr.Zero)
+				proc = SDL.SDL_GL_GetProcAddress(procName + ext);
+			if (proc == IntPtr.Zero)
+				throw new Exception("Failed to load SDL_GL proc :" + procName);
+			return Marshal.GetDelegateForFunctionPointer(proc, type);
+		}
+
 		private void LoadGLEntryPoints()
 		{
 			string baseErrorString;
@@ -887,186 +903,153 @@ namespace Microsoft.Xna.Framework.Graphics
 			/* Basic entry points. If you don't have these, you're screwed. */
 			try
 			{
-				INTERNAL_glGetString = (GetString) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetString"),
-					typeof(GetString)
-				);
-				glGetIntegerv = (GetIntegerv) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetIntegerv"),
-					typeof(GetIntegerv)
-				);
-				glEnable = (Enable) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glEnable"),
-					typeof(Enable)
-				);
-				glDisable = (Disable) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDisable"),
-					typeof(Disable)
-				);
-				glViewport = (G_Viewport) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glViewport"),
-					typeof(G_Viewport)
-				);
-				glScissor = (Scissor) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glScissor"),
-					typeof(Scissor)
-				);
-				glBlendColor = (BlendColor) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBlendColor"),
-					typeof(BlendColor)
-				);
-				glBlendFuncSeparate = (BlendFuncSeparate) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBlendFuncSeparate"),
-					typeof(BlendFuncSeparate)
-				);
-				glBlendEquationSeparate = (BlendEquationSeparate) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBlendEquationSeparate"),
-					typeof(BlendEquationSeparate)
-				);
-				glColorMask = (ColorMask) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glColorMask"),
-					typeof(ColorMask)
-				);
-				glDepthMask = (DepthMask) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDepthMask"),
-					typeof(DepthMask)
-				);
-				glDepthFunc = (DepthFunc) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDepthFunc"),
+				INTERNAL_glGetString = (GetString) GetDelegateFromSDL("glGetString",typeof(GetString));
+				glGetIntegerv = (GetIntegerv) GetDelegateFromSDL("glGetIntegerv",typeof(GetIntegerv));
+				glEnable = (Enable) GetDelegateFromSDL("glEnable",typeof(Enable));
+				glDisable = (Disable) GetDelegateFromSDL("glDisable",typeof(Disable));
+				glViewport = (G_Viewport) GetDelegateFromSDL("glViewport",typeof(G_Viewport));
+				glScissor = (Scissor) GetDelegateFromSDL("glScissor", typeof(Scissor));
+				glBlendColor = (BlendColor) GetDelegateFromSDL("glBlendColor",typeof(BlendColor));
+				glBlendFuncSeparate = (BlendFuncSeparate) GetDelegateFromSDL("glBlendFuncSeparate",typeof(BlendFuncSeparate));
+				glBlendEquationSeparate = (BlendEquationSeparate) GetDelegateFromSDL("glBlendEquationSeparate",typeof(BlendEquationSeparate));
+				glColorMask = (ColorMask) GetDelegateFromSDL("glColorMask",typeof(ColorMask));
+				glDepthMask = (DepthMask) GetDelegateFromSDL("glDepthMask",typeof(DepthMask));
+				glDepthFunc = (DepthFunc) GetDelegateFromSDL(
+					("glDepthFunc"),
 					typeof(DepthFunc)
 				);
-				glStencilMask = (StencilMask) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glStencilMask"),
+				glStencilMask = (StencilMask) GetDelegateFromSDL(
+					("glStencilMask"),
 					typeof(StencilMask)
 				);
-				glStencilFuncSeparate = (StencilFuncSeparate) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glStencilFuncSeparate"),
+				glStencilFuncSeparate = (StencilFuncSeparate) GetDelegateFromSDL(
+					("glStencilFuncSeparate"),
 					typeof(StencilFuncSeparate)
 				);
-				glStencilOpSeparate = (StencilOpSeparate) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glStencilOpSeparate"),
+				glStencilOpSeparate = (StencilOpSeparate) GetDelegateFromSDL(
+					("glStencilOpSeparate"),
 					typeof(StencilOpSeparate)
 				);
-				glStencilFunc = (StencilFunc) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glStencilFunc"),
+				glStencilFunc = (StencilFunc) GetDelegateFromSDL(
+					("glStencilFunc"),
 					typeof(StencilFunc)
 				);
-				glStencilOp = (StencilOp) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glStencilOp"),
+				glStencilOp = (StencilOp) GetDelegateFromSDL(
+					("glStencilOp"),
 					typeof(StencilOp)
 				);
-				glFrontFace = (FrontFace) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glFrontFace"),
+				glFrontFace = (FrontFace) GetDelegateFromSDL(
+					("glFrontFace"),
 					typeof(FrontFace)
 				);
-				glPolygonOffset = (PolygonOffset) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glPolygonOffset"),
+				glPolygonOffset = (PolygonOffset) GetDelegateFromSDL(
+					("glPolygonOffset"),
 					typeof(PolygonOffset)
 				);
-				glGenTextures = (GenTextures) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGenTextures"),
+				glGenTextures = (GenTextures) GetDelegateFromSDL(
+					("glGenTextures"),
 					typeof(GenTextures)
 				);
-				glDeleteTextures = (DeleteTextures) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDeleteTextures"),
+				glDeleteTextures = (DeleteTextures) GetDelegateFromSDL(
+					("glDeleteTextures"),
 					typeof(DeleteTextures)
 				);
-				glBindTexture = (G_BindTexture) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBindTexture"),
+				glBindTexture = (G_BindTexture) GetDelegateFromSDL(
+					("glBindTexture"),
 					typeof(G_BindTexture)
 				);
-				glTexImage2D = (TexImage2D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexImage2D"),
+				glTexImage2D = (TexImage2D) GetDelegateFromSDL(
+					("glTexImage2D"),
 					typeof(TexImage2D)
 				);
-				glTexSubImage2D = (TexSubImage2D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexSubImage2D"),
+				glTexSubImage2D = (TexSubImage2D) GetDelegateFromSDL(
+					("glTexSubImage2D"),
 					typeof(TexSubImage2D)
 				);
-				glCompressedTexImage2D = (CompressedTexImage2D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glCompressedTexImage2D"),
+				glCompressedTexImage2D = (CompressedTexImage2D) GetDelegateFromSDL(
+					("glCompressedTexImage2D"),
 					typeof(CompressedTexImage2D)
 				);
-				glCompressedTexSubImage2D = (CompressedTexSubImage2D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glCompressedTexSubImage2D"),
+				glCompressedTexSubImage2D = (CompressedTexSubImage2D) GetDelegateFromSDL(
+					("glCompressedTexSubImage2D"),
 					typeof(CompressedTexSubImage2D)
 				);
-				glTexParameteri = (TexParameteri) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexParameteri"),
+				glTexParameteri = (TexParameteri) GetDelegateFromSDL(
+					("glTexParameteri"),
 					typeof(TexParameteri)
 				);
-				glTexParameterf = (TexParameterf) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexParameterf"),
+				glTexParameterf = (TexParameterf) GetDelegateFromSDL(
+					("glTexParameterf"),
 					typeof(TexParameterf)
 				);
-				glActiveTexture = (ActiveTexture) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glActiveTexture"),
+				glActiveTexture = (ActiveTexture) GetDelegateFromSDL(
+					("glActiveTexture"),
 					typeof(ActiveTexture)
 				);
-				glPixelStorei = (PixelStorei) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glPixelStorei"),
+				glPixelStorei = (PixelStorei) GetDelegateFromSDL(
+					("glPixelStorei"),
 					typeof(PixelStorei)
 				);
-				glGenBuffers = (GenBuffers) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGenBuffers"),
+				glGenBuffers = (GenBuffers) GetDelegateFromSDL(
+					("glGenBuffers"),
 					typeof(GenBuffers)
 				);
-				glDeleteBuffers = (DeleteBuffers) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDeleteBuffers"),
+				glDeleteBuffers = (DeleteBuffers) GetDelegateFromSDL(
+					("glDeleteBuffers"),
 					typeof(DeleteBuffers)
 				);
-				glBindBuffer = (BindBuffer) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBindBuffer"),
+				glBindBuffer = (BindBuffer) GetDelegateFromSDL(
+					("glBindBuffer"),
 					typeof(BindBuffer)
 				);
-				glBufferData = (BufferData) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBufferData"),
+				glBufferData = (BufferData) GetDelegateFromSDL(
+					("glBufferData"),
 					typeof(BufferData)
 				);
-				glBufferSubData = (BufferSubData) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBufferSubData"),
+				glBufferSubData = (BufferSubData) GetDelegateFromSDL(
+					("glBufferSubData"),
 					typeof(BufferSubData)
 				);
-				glClearColor = (ClearColor) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glClearColor"),
+				glClearColor = (ClearColor) GetDelegateFromSDL(
+					("glClearColor"),
 					typeof(ClearColor)
 				);
-				glClearStencil = (ClearStencil) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glClearStencil"),
+				glClearStencil = (ClearStencil) GetDelegateFromSDL(
+					("glClearStencil"),
 					typeof(ClearStencil)
 				);
-				glClear = (G_Clear) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glClear"),
+				glClear = (G_Clear) GetDelegateFromSDL(
+					("glClear"),
 					typeof(G_Clear)
 				);
-				glDrawBuffers = (DrawBuffers) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDrawBuffers"),
+				glDrawBuffers = (DrawBuffers) GetDelegateFromSDL(
+					("glDrawBuffers"),
 					typeof(DrawBuffers)
 				);
-				glReadPixels = (ReadPixels) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glReadPixels"),
+				glReadPixels = (ReadPixels) GetDelegateFromSDL(
+					("glReadPixels"),
 					typeof(ReadPixels)
 				);
-				glVertexAttribPointer = (VertexAttribPointer) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glVertexAttribPointer"),
+				glVertexAttribPointer = (VertexAttribPointer) GetDelegateFromSDL(
+					("glVertexAttribPointer"),
 					typeof(VertexAttribPointer)
 				);
-				glEnableVertexAttribArray = (EnableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glEnableVertexAttribArray"),
+				glEnableVertexAttribArray = (EnableVertexAttribArray) GetDelegateFromSDL(
+					("glEnableVertexAttribArray"),
 					typeof(EnableVertexAttribArray)
 				);
-				glDisableVertexAttribArray = (DisableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDisableVertexAttribArray"),
+				glDisableVertexAttribArray = (DisableVertexAttribArray) GetDelegateFromSDL(
+					("glDisableVertexAttribArray"),
 					typeof(DisableVertexAttribArray)
 				);
-				glDrawArrays = (DrawArrays) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDrawArrays"),
+				glDrawArrays = (DrawArrays) GetDelegateFromSDL(
+					("glDrawArrays"),
 					typeof(DrawArrays)
 				);
 			}
-			catch
+			catch(Exception e)
 			{
-				throw new NoSuitableGraphicsDeviceException(baseErrorString);
+				throw new NoSuitableGraphicsDeviceException(baseErrorString + " (" + e.Message + ")");
 			}
 
 			/* ARB_draw_elements_base_vertex is ideal! */
@@ -1074,12 +1057,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			supportsBaseVertex = ep != IntPtr.Zero;
 			if (supportsBaseVertex)
 			{
-				glDrawRangeElementsBaseVertex = (DrawRangeElementsBaseVertex) Marshal.GetDelegateForFunctionPointer(
-					ep,
+				glDrawRangeElementsBaseVertex = (DrawRangeElementsBaseVertex) GetDelegateFromSDL(
+					"glDrawRangeElementsBaseVertex",
 					typeof(DrawRangeElementsBaseVertex)
 				);
-				glDrawRangeElements = (DrawRangeElements) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDrawRangeElements"),
+				glDrawRangeElements = (DrawRangeElements) GetDelegateFromSDL(
+					("glDrawRangeElements"),
 					typeof(DrawRangeElements)
 				);
 			}
@@ -1089,25 +1072,26 @@ namespace Microsoft.Xna.Framework.Graphics
 				ep = SDL.SDL_GL_GetProcAddress("glDrawRangeElements");
 				if (ep != IntPtr.Zero)
 				{
-					glDrawRangeElements = (DrawRangeElements) Marshal.GetDelegateForFunctionPointer(
-						ep,
+					glDrawRangeElements = (DrawRangeElements) GetDelegateFromSDL(
+						"glDrawRangeElements",
 						typeof(DrawRangeElements)
 					);
 					glDrawRangeElementsBaseVertex = DrawRangeElementsNoBase;
 				}
 				else
 				{
-					ep = SDL.SDL_GL_GetProcAddress("glDrawElements");
-					if (ep == IntPtr.Zero)
-					{
-						throw new NoSuitableGraphicsDeviceException(baseErrorString);
+					try {
+						glDrawElements = (DrawElements) GetDelegateFromSDL(
+							"glDrawElements",
+							typeof(DrawElements)
+						);
+						glDrawRangeElements = DrawRangeElementsUnchecked;
+						glDrawRangeElementsBaseVertex = DrawRangeElementsNoBaseUnchecked;
 					}
-					glDrawElements = (DrawElements) Marshal.GetDelegateForFunctionPointer(
-						ep,
-						typeof(DrawElements)
-					);
-					glDrawRangeElements = DrawRangeElementsUnchecked;
-					glDrawRangeElementsBaseVertex = DrawRangeElementsNoBaseUnchecked;
+					catch(Exception e)
+					{
+						throw new NoSuitableGraphicsDeviceException(baseErrorString + " (" + e.Message + ")");
+					}
 				}
 			}
 
@@ -1121,8 +1105,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				ep = SDL.SDL_GL_GetProcAddress("glPolygonMode");
 				if (ep != IntPtr.Zero)
 				{
-					glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
-						ep,
+					glPolygonMode = (PolygonMode) GetDelegateFromSDL(
+						"glPolygonMode",
 						typeof(PolygonMode)
 					);
 				}
@@ -1133,8 +1117,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				ep = SDL.SDL_GL_GetProcAddress("glGetTexImage");
 				if (ep != IntPtr.Zero)
 				{
-					glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
-						ep,
+					glGetTexImage = (GetTexImage) GetDelegateFromSDL(
+						"glGetTexImage",
 						typeof(GetTexImage)
 					);
 				}
@@ -1145,8 +1129,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				ep = SDL.SDL_GL_GetProcAddress("glGetBufferSubData");
 				if (ep != IntPtr.Zero)
 				{
-					glGetBufferSubData = (GetBufferSubData) Marshal.GetDelegateForFunctionPointer(
-						ep,
+					glGetBufferSubData = (GetBufferSubData) GetDelegateFromSDL(
+						"glGetBufferSubData",
 						typeof(GetBufferSubData)
 					);
 				}
@@ -1159,168 +1143,168 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				try
 				{
-					glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glPolygonMode"),
+					glPolygonMode = (PolygonMode) GetDelegateFromSDL(
+						("glPolygonMode"),
 						typeof(PolygonMode)
 					);
-					glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glGetTexImage"),
+					glGetTexImage = (GetTexImage) GetDelegateFromSDL(
+						("glGetTexImage"),
 						typeof(GetTexImage)
 					);
-					glGetBufferSubData = (GetBufferSubData) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glGetBufferSubData"),
+					glGetBufferSubData = (GetBufferSubData) GetDelegateFromSDL(
+						("glGetBufferSubData"),
 						typeof(GetBufferSubData)
 					);
 				}
-				catch
+				catch (Exception e)
 				{
-					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+					throw new NoSuitableGraphicsDeviceException(baseErrorString + " (" + e.Message + ")");
 				}
 			}
 
-			/* We need _some_ form of depth range, ES... */
-			IntPtr drPtr = SDL.SDL_GL_GetProcAddress("glDepthRange");
-			if (drPtr != IntPtr.Zero)
+			try 
 			{
-				glDepthRange = (DepthRange) Marshal.GetDelegateForFunctionPointer(
-					drPtr,
-					typeof(DepthRange)
-				);
-			}
-			else
-			{
-				drPtr = SDL.SDL_GL_GetProcAddress("glDepthRangef");
-				if (drPtr == IntPtr.Zero)
+				/* We need _some_ form of depth range, ES... */
+				IntPtr drPtr = SDL.SDL_GL_GetProcAddress("glDepthRange");
+				if (drPtr != IntPtr.Zero)
 				{
-					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+					glDepthRange = (DepthRange) GetDelegateFromSDL(
+						"glDepthRange",
+						typeof(DepthRange)
+					);
 				}
-				glDepthRangef = (DepthRangef) Marshal.GetDelegateForFunctionPointer(
-					drPtr,
-					typeof(DepthRangef)
-				);
-				glDepthRange = DepthRangeFloat;
-			}
-			drPtr = SDL.SDL_GL_GetProcAddress("glClearDepth");
-			if (drPtr != IntPtr.Zero)
-			{
-				glClearDepth = (ClearDepth) Marshal.GetDelegateForFunctionPointer(
-					drPtr,
-					typeof(ClearDepth)
-				);
-			}
-			else
-			{
-				drPtr = SDL.SDL_GL_GetProcAddress("glClearDepthf");
-				if (drPtr == IntPtr.Zero)
+				else
 				{
-					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+					glDepthRangef = (DepthRangef) GetDelegateFromSDL(
+						"glDepthRangef",
+						typeof(DepthRangef)
+					);
+					glDepthRange = DepthRangeFloat;
 				}
-				glClearDepthf = (ClearDepthf) Marshal.GetDelegateForFunctionPointer(
-					drPtr,
-					typeof(ClearDepthf)
-				);
-				glClearDepth = ClearDepthFloat;
+				drPtr = SDL.SDL_GL_GetProcAddress("glClearDepth");
+				if (drPtr != IntPtr.Zero)
+				{
+					glClearDepth = (ClearDepth) GetDelegateFromSDL(
+						"glClearDepth",
+						typeof(ClearDepth)
+					);
+				}
+				else
+				{
+					glClearDepthf = (ClearDepthf) GetDelegateFromSDL(
+						"glClearDepthf",
+						typeof(ClearDepthf)
+					);
+					glClearDepth = ClearDepthFloat;
+				}
+
+			}
+			catch (Exception e)
+			{
+				throw new NoSuitableGraphicsDeviceException(baseErrorString+ " ("+e.Message+")");
 			}
 
 			/* Silently fail if using GLES. You didn't need these, right...? >_> */
 			try
 			{
-				glTexImage3D = (TexImage3D) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glTexImage3D", "OES"),
-					typeof(TexImage3D)
+				glTexImage3D = (TexImage3D) GetDelegateFromSDLEXT(
+					("glTexImage3D"),
+					typeof(TexImage3D),
+					"OES"
 				);
-				glTexSubImage3D = (TexSubImage3D) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glTexSubImage3D", "OES"),
-					typeof(TexSubImage3D)
+				glTexSubImage3D = (TexSubImage3D) GetDelegateFromSDLEXT(
+					("glTexSubImage3D"),
+					typeof(TexSubImage3D),
+					"OES"
 				);
-				glGenQueries = (GenQueries) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGenQueries"),
+				glGenQueries = (GenQueries) GetDelegateFromSDL(
+					("glGenQueries"),
 					typeof(GenQueries)
 				);
-				glDeleteQueries = (DeleteQueries) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDeleteQueries"),
+				glDeleteQueries = (DeleteQueries) GetDelegateFromSDL(
+					("glDeleteQueries"),
 					typeof(DeleteQueries)
 				);
-				glBeginQuery = (BeginQuery) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBeginQuery"),
+				glBeginQuery = (BeginQuery) GetDelegateFromSDL(
+					("glBeginQuery"),
 					typeof(BeginQuery)
 				);
-				glEndQuery = (EndQuery) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glEndQuery"),
+				glEndQuery = (EndQuery) GetDelegateFromSDL(
+					("glEndQuery"),
 					typeof(EndQuery)
 				);
-				glGetQueryObjectuiv = (GetQueryObjectuiv) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetQueryObjectuiv"),
+				glGetQueryObjectuiv = (GetQueryObjectuiv) GetDelegateFromSDL(
+					("glGetQueryObjectuiv"),
 					typeof(GetQueryObjectuiv)
 				);
 			}
-			catch
+			catch(Exception e)
 			{
 				if (useES3)
 				{
-					FNALoggerEXT.LogWarn("Some non-ES functions failed to load. Beware...");
+					FNALoggerEXT.LogWarn("Some non-ES functions failed to load. Beware... ("+e.Message+")");
 				}
 				else
 				{
-					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+					throw new NoSuitableGraphicsDeviceException(baseErrorString +" ("+e.Message+")");
 				}
 			}
 
 			/* ARB_framebuffer_object. We're flexible, but not _that_ flexible. */
 			try
 			{
-				glGenFramebuffers = (GenFramebuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glGenFramebuffers"),
+				glGenFramebuffers = (GenFramebuffers) GetDelegateFromSDLEXT(
+					("glGenFramebuffers"),
 					typeof(GenFramebuffers)
 				);
-				glDeleteFramebuffers = (DeleteFramebuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glDeleteFramebuffers"),
+				glDeleteFramebuffers = (DeleteFramebuffers)GetDelegateFromSDLEXT(
+					("glDeleteFramebuffers"),
 					typeof(DeleteFramebuffers)
 				);
-				glBindFramebuffer = (G_BindFramebuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glBindFramebuffer"),
+				glBindFramebuffer = (G_BindFramebuffer)GetDelegateFromSDLEXT(
+					("glBindFramebuffer"),
 					typeof(G_BindFramebuffer)
 				);
-				glFramebufferTexture2D = (FramebufferTexture2D) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glFramebufferTexture2D"),
+				glFramebufferTexture2D = (FramebufferTexture2D)GetDelegateFromSDLEXT(
+					("glFramebufferTexture2D"),
 					typeof(FramebufferTexture2D)
 				);
-				glFramebufferRenderbuffer = (FramebufferRenderbuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glFramebufferRenderbuffer"),
+				glFramebufferRenderbuffer = (FramebufferRenderbuffer)GetDelegateFromSDLEXT(
+					("glFramebufferRenderbuffer"),
 					typeof(FramebufferRenderbuffer)
 				);
-				glGenerateMipmap = (GenerateMipmap) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glGenerateMipmap"),
+				glGenerateMipmap = (GenerateMipmap)GetDelegateFromSDLEXT(
+					("glGenerateMipmap"),
 					typeof(GenerateMipmap)
 				);
-				glGenRenderbuffers = (GenRenderbuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glGenRenderbuffers"),
+				glGenRenderbuffers = (GenRenderbuffers)GetDelegateFromSDLEXT(
+					("glGenRenderbuffers"),
 					typeof(GenRenderbuffers)
 				);
-				glDeleteRenderbuffers = (DeleteRenderbuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glDeleteRenderbuffers"),
+				glDeleteRenderbuffers = (DeleteRenderbuffers)GetDelegateFromSDLEXT(
+					("glDeleteRenderbuffers"),
 					typeof(DeleteRenderbuffers)
 				);
-				glBindRenderbuffer = (BindRenderbuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glBindRenderbuffer"),
+				glBindRenderbuffer = (BindRenderbuffer)GetDelegateFromSDLEXT(
+					("glBindRenderbuffer"),
 					typeof(BindRenderbuffer)
 				);
-				glRenderbufferStorage = (RenderbufferStorage) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glRenderbufferStorage"),
+				glRenderbufferStorage = (RenderbufferStorage)GetDelegateFromSDLEXT(
+					("glRenderbufferStorage"),
 					typeof(RenderbufferStorage)
 				);
 			}
-			catch
+			catch(Exception e)
 			{
-				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required!");
+				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required! ("+e.Message+")");
 			}
 
 			/* EXT_framebuffer_blit (or ARB_framebuffer_object) is needed by the faux-backbuffer. */
 			supportsFauxBackbuffer = true;
 			try
 			{
-				glBlitFramebuffer = (BlitFramebuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glBlitFramebuffer"),
+				glBlitFramebuffer = (BlitFramebuffer) GetDelegateFromSDLEXT(
+					("glBlitFramebuffer"),
 					typeof(BlitFramebuffer)
 				);
 			}
@@ -1333,9 +1317,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			supportsMultisampling = true;
 			try
 			{
-				glRenderbufferStorageMultisample = (RenderbufferStorageMultisample) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glRenderbufferStorageMultisample"),
-					typeof(RenderbufferStorageMultisample)
+				glRenderbufferStorageMultisample = (RenderbufferStorageMultisample) GetDelegateFromSDLEXT("glRenderbufferStorageMultisample", typeof(RenderbufferStorageMultisample)
 				);
 			}
 			catch
@@ -1347,24 +1329,16 @@ namespace Microsoft.Xna.Framework.Graphics
 			SupportsHardwareInstancing = true;
 			try
 			{
-				glVertexAttribDivisor = (VertexAttribDivisor) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor"),
-					typeof(VertexAttribDivisor)
-				);
+				glVertexAttribDivisor = (VertexAttribDivisor) GetDelegateFromSDL("glVertexAttribDivisor",typeof(VertexAttribDivisor));
 				/* The likelihood of someone having BaseVertex but not Instanced is 0...? */
 				if (supportsBaseVertex)
 				{
-					glDrawElementsInstancedBaseVertex = (DrawElementsInstancedBaseVertex) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glDrawElementsInstancedBaseVertex"),
-						typeof(DrawElementsInstancedBaseVertex)
+					glDrawElementsInstancedBaseVertex = (DrawElementsInstancedBaseVertex) GetDelegateFromSDL("glDrawElementsInstancedBaseVertex",typeof(DrawElementsInstancedBaseVertex)
 					);
 				}
 				else
 				{
-					glDrawElementsInstanced = (DrawElementsInstanced) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glDrawElementsInstanced"),
-						typeof(DrawElementsInstanced)
-					);
+					glDrawElementsInstanced = (DrawElementsInstanced) GetDelegateFromSDL("glDrawElementsInstanced",typeof(DrawElementsInstanced));
 					glDrawElementsInstancedBaseVertex = DrawElementsInstancedNoBase;
 				}
 			}
@@ -1376,10 +1350,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			/* EXT_draw_buffers2 is probably used by nobody. */
 			try
 			{
-				glColorMaskIndexedEXT = (ColorMaskIndexedEXT) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glColorMaskIndexedEXT"),
-					typeof(ColorMaskIndexedEXT)
-				);
+				glColorMaskIndexedEXT = (ColorMaskIndexedEXT) GetDelegateFromSDL("glColorMaskIndexedEXT",typeof(ColorMaskIndexedEXT));
 			}
 			catch
 			{
@@ -1389,10 +1360,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			/* ARB_texture_multisample is probably used by nobody. */
 			try
 			{
-				glSampleMaski = (SampleMaski) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glSampleMaski"),
-					typeof(SampleMaski)
-				);
+				glSampleMaski = (SampleMaski) GetDelegateFromSDL("glSampleMaski",typeof(SampleMaski));
 			}
 			catch
 			{
@@ -1403,26 +1371,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				try
 				{
-					INTERNAL_glGetStringi = (GetStringi) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glGetStringi"),
-						typeof(GetStringi)
-					);
-					glGenVertexArrays = (GenVertexArrays) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glGenVertexArrays"),
-						typeof(GenVertexArrays)
-					);
-					glDeleteVertexArrays = (DeleteVertexArrays) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glDeleteVertexArrays"),
-						typeof(DeleteVertexArrays)
-					);
-					glBindVertexArray = (BindVertexArray) Marshal.GetDelegateForFunctionPointer(
-						SDL.SDL_GL_GetProcAddress("glBindVertexArray"),
-						typeof(BindVertexArray)
-					);
+					INTERNAL_glGetStringi = (GetStringi) GetDelegateFromSDL("glGetStringi",typeof(GetStringi));
+					glGenVertexArrays = (GenVertexArrays) GetDelegateFromSDL("glGenVertexArrays",typeof(GenVertexArrays));
+					glDeleteVertexArrays = (DeleteVertexArrays) GetDelegateFromSDL("glDeleteVertexArrays", typeof(DeleteVertexArrays));
+					glBindVertexArray = (BindVertexArray) GetDelegateFromSDL("glBindVertexArray", typeof(BindVertexArray));
 				}
-				catch
+				catch(Exception e)
 				{
-					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required!");
+					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required! ("+e.Message+")");
 				}
 			}
 
@@ -1436,11 +1392,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			else
 			{
-				glDebugMessageCallbackARB = (DebugMessageCallback) Marshal.GetDelegateForFunctionPointer(
+				glDebugMessageCallbackARB = (DebugMessageCallback) GetDelegateFromSDL(
 					messageCallback,
 					typeof(DebugMessageCallback)
 				);
-				glDebugMessageControlARB = (DebugMessageControl) Marshal.GetDelegateForFunctionPointer(
+				glDebugMessageControlARB = (DebugMessageControl) GetDelegateFromSDL(
 					messageControl,
 					typeof(DebugMessageControl)
 				);
@@ -1479,22 +1435,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			else
 			{
-				glStringMarkerGREMEDY = (StringMarkerGREMEDY) Marshal.GetDelegateForFunctionPointer(
+				glStringMarkerGREMEDY = (StringMarkerGREMEDY) GetDelegateFromSDL(
 					stringMarkerCallback,
 					typeof(StringMarkerGREMEDY)
 				);
 			}
 #endif
-		}
-
-		private IntPtr TryGetEPEXT(string ep, string ext = "EXT")
-		{
-			IntPtr result = SDL.SDL_GL_GetProcAddress(ep);
-			if (result == IntPtr.Zero)
-			{
-				result = SDL.SDL_GL_GetProcAddress(ep + ext);
-			}
-			return result;
 		}
 
 		private void DrawRangeElementsNoBase(
