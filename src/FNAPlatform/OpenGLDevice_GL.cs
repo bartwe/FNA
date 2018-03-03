@@ -904,14 +904,22 @@ namespace Microsoft.Xna.Framework.Graphics
 			try
 			{
 				INTERNAL_glGetString = (GetString) GetDelegateFromSDL("glGetString",typeof(GetString));
+
+                // Print GL information
+                FNALoggerEXT.LogInfo("OpenGL Device: " + glGetString(GLenum.GL_RENDERER));
+                FNALoggerEXT.LogInfo("OpenGL Driver: " + glGetString(GLenum.GL_VERSION));
+                FNALoggerEXT.LogInfo("OpenGL Vendor: " + glGetString(GLenum.GL_VENDOR));
+
 				glGetIntegerv = (GetIntegerv) GetDelegateFromSDL("glGetIntegerv",typeof(GetIntegerv));
 				glEnable = (Enable) GetDelegateFromSDL("glEnable",typeof(Enable));
 				glDisable = (Disable) GetDelegateFromSDL("glDisable",typeof(Disable));
 				glViewport = (G_Viewport) GetDelegateFromSDL("glViewport",typeof(G_Viewport));
 				glScissor = (Scissor) GetDelegateFromSDL("glScissor", typeof(Scissor));
-				glBlendColor = (BlendColor) GetDelegateFromSDL("glBlendColor",typeof(BlendColor));
+
+                glBlendColor = (BlendColor) GetDelegateFromSDL("glBlendColor",typeof(BlendColor));
 				glBlendFuncSeparate = (BlendFuncSeparate) GetDelegateFromSDL("glBlendFuncSeparate",typeof(BlendFuncSeparate));
 				glBlendEquationSeparate = (BlendEquationSeparate) GetDelegateFromSDL("glBlendEquationSeparate",typeof(BlendEquationSeparate));
+
 				glColorMask = (ColorMask) GetDelegateFromSDL("glColorMask",typeof(ColorMask));
 				glDepthMask = (DepthMask) GetDelegateFromSDL("glDepthMask",typeof(DepthMask));
 				glDepthFunc = (DepthFunc) GetDelegateFromSDL(

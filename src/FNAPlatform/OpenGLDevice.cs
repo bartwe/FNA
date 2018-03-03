@@ -566,6 +566,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				presentationParameters.DeviceWindowHandle
 			);
 
+            FNALoggerEXT.LogInfo("IGLDevice: OpenGLDevice");
+
 			// Check for a possible ES context
 			int flags;
 			int es3Flag = (int) SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_ES;
@@ -606,11 +608,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				"FNA_OPENGL_BACKBUFFER_SCALE_NEAREST"
 			) == "1" ? GLenum.GL_NEAREST : GLenum.GL_LINEAR;
 
-			// Print GL information
-			FNALoggerEXT.LogInfo("IGLDevice: OpenGLDevice");
-			FNALoggerEXT.LogInfo("OpenGL Device: " + glGetString(GLenum.GL_RENDERER));
-			FNALoggerEXT.LogInfo("OpenGL Driver: " + glGetString(GLenum.GL_VERSION));
-			FNALoggerEXT.LogInfo("OpenGL Vendor: " + glGetString(GLenum.GL_VENDOR));
 			FNALoggerEXT.LogInfo("MojoShader Profile: " + shaderProfile);
 
 			// Load the extension list, initialize extension-dependent components
