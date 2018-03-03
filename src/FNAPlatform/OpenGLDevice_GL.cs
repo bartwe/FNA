@@ -898,17 +898,23 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				baseErrorString = "OpenGL 2.1";
 			}
-			baseErrorString += " support is required!";
+			baseErrorString += " support is required.";
 
 			/* Basic entry points. If you don't have these, you're screwed. */
+            string device = "unknown";
+            string version = "unknown";
+            string vendor = "unknown";
 			try
 			{
 				INTERNAL_glGetString = (GetString) GetDelegateFromSDL("glGetString",typeof(GetString));
 
                 // Print GL information
-                FNALoggerEXT.LogInfo("OpenGL Device: " + glGetString(GLenum.GL_RENDERER));
-                FNALoggerEXT.LogInfo("OpenGL Driver: " + glGetString(GLenum.GL_VERSION));
-                FNALoggerEXT.LogInfo("OpenGL Vendor: " + glGetString(GLenum.GL_VENDOR));
+                device =  glGetString(GLenum.GL_RENDERER);
+                version =  glGetString(GLenum.GL_VERSION);
+                vendor = glGetString(GLenum.GL_VENDOR);
+                FNALoggerEXT.LogInfo("OpenGL Device: " + device);
+                FNALoggerEXT.LogInfo("OpenGL Driver: " + version);
+                FNALoggerEXT.LogInfo("OpenGL Vendor: " + vendor);
 
 				glGetIntegerv = (GetIntegerv) GetDelegateFromSDL("glGetIntegerv",typeof(GetIntegerv));
 				glEnable = (Enable) GetDelegateFromSDL("glEnable",typeof(Enable));
@@ -1057,7 +1063,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			catch(Exception e)
 			{
-				throw new NoSuitableGraphicsDeviceException(baseErrorString + " (" + e.Message + ")");
+                throw new NoSuitableGraphicsDeviceException(baseErrorString + " (" + e.Message + ") vendor: " + vendor + " version: " + version + " device: " + device);
 			}
 
 			/* ARB_draw_elements_base_vertex is ideal! */
