@@ -632,9 +632,9 @@ namespace Microsoft.Xna.Framework
 						if (!keys.Contains(key))
 						{
 							keys.Add(key);
-							if (textInputBindings.ContainsKey(key))
+						    int textIndex;
+						    if (textInputBindings.TryGetValue(key, out textIndex))
 							{
-								int textIndex = textInputBindings[key];
 								textInputControlDown[textIndex] = true;
 								textInputControlRepeat[textIndex] = Environment.TickCount + 400;
 								TextInputEXT.OnTextInput(textInputCharacters[textIndex]);
@@ -651,11 +651,11 @@ namespace Microsoft.Xna.Framework
 					else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
 					{
 						Keys key = ToXNAKey(ref evt.key.keysym);
-						if (keys.Remove(key))
-						{
-							if (textInputBindings.ContainsKey(key))
+						if (keys.Remove(key)) {
+						    int value;
+						    if (textInputBindings.TryGetValue(key, out value))
 							{
-								textInputControlDown[textInputBindings[key]] = false;
+								textInputControlDown[value] = false;
 							}
 							else if ((!keys.Contains(Keys.LeftControl) && textInputControlDown[3]) || key == Keys.V)
 							{

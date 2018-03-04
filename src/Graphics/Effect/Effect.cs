@@ -866,9 +866,10 @@ namespace Microsoft.Xna.Framework.Graphics
 						string samplerName = Marshal.PtrToStringAnsi(
 							registers[i].sampler_name
 						);
-						if (samplerMap.ContainsKey(samplerName))
+					    EffectParameter value;
+					    if (samplerMap.TryGetValue(samplerName, out value))
 						{
-							Texture texture = samplerMap[samplerName].texture;
+							Texture texture = value.texture;
 							if (texture != null)
 							{
 								textures[register] = texture;
