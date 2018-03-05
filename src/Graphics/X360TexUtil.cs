@@ -110,7 +110,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					}
 				}
 
-                return imageDataStream.ToArray();
+				return imageDataStream.ToArray();
 			}
 		}
 
@@ -145,7 +145,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					}
 				}
 
-                return imageDataStream.ToArray();
+				return imageDataStream.ToArray();
 			}
 		}
 
@@ -156,8 +156,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		public static ushort SwapEndian(ushort data)
 		{
 			return (ushort) (
-			    ((ushort) ((data & 0xFF) << 8)) |
-			    ((ushort) ((data >> 8) & 0xFF))
+				((ushort) ((data & 0xFF) << 8)) |
+				((ushort) ((data >> 8) & 0xFF))
 			);
 		}
 
