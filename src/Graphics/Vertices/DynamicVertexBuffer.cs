@@ -89,6 +89,25 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
+        public unsafe void SetData(
+            int offsetInBytes,
+            void* data,
+            int elementSizeInBytes,
+            int startIndex,
+            int elementCount,
+            int vertexStride,
+            SetDataOptions options
+        ) {
+            base.SetDataInternal(
+                offsetInBytes,
+                data,
+                elementSizeInBytes,
+                startIndex,
+                elementCount,
+                vertexStride,
+                options
+            );
+        }
 		public void SetData<T>(
 			T[] data,
 			int startIndex,

@@ -252,7 +252,26 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-		#endregion
+        public unsafe void SetData(
+            int offsetInBytes,
+            void* data,
+            int elementSizeInBytes,
+            int startIndex,
+            int elementCount,
+            int vertexStride
+        ) {
+            SetDataInternal(
+                offsetInBytes,
+                data,
+                elementSizeInBytes,
+                startIndex,
+                elementCount,
+                vertexStride,
+                SetDataOptions.None
+            );
+        }
+
+        #endregion
 
 		#region Internal Master SetData Methods
 
@@ -311,6 +330,55 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			handle.Free();
 		}
+
+	    protected unsafe void SetDataInternal(
+	        int offsetInBytes,
+	        void* data,
+	        int elementSizeInBytes,
+	        int startIndex,
+	        int elementCount,
+	        int vertexStride,
+	        SetDataOptions options
+	        ) {
+	        if (data == null) {
+	            throw new ArgumentNullException("data");
+	        }
+	        if (elementCount <= 0) {
+	            throw new InvalidOperationException(
+	                "The array specified in the data parameter" +
+	                " is not the correct size for the amount of" +
+	                " data requested."
+	                );
+	        }
+
+	        if (elementCount > 1 &&
+	            (elementCount * vertexStride > (int)buffer.BufferSize)) {
+	            throw new InvalidOperationException(
+	                "The vertex stride is larger than the vertex buffer."
+	                );
+	        }
+
+	        if (vertexStride == 0) {
+	            vertexStride = elementSizeInBytes;
+	        }
+	        if (vertexStride < elementSizeInBytes) {
+	            throw new ArgumentOutOfRangeException(
+	                "The vertex stride must be greater than" +
+	                " or equal to the size of the specified data (" +
+	                elementSizeInBytes.ToString() + ")."
+	                );
+	        }
+
+	        GraphicsDevice.GLDevice.SetVertexBufferData(
+	            buffer,
+	            offsetInBytes,
+	            (IntPtr)data,
+	            startIndex,
+	            elementCount,
+	            elementSizeInBytes,
+	            options
+	            );
+	    }
 
 		#endregion
 

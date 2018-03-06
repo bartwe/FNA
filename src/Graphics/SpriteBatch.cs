@@ -1085,17 +1085,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			vertexInfo[numSprites].Color3 = color;
 
 			if (sortMode == SpriteSortMode.Immediate)
-			{
-				vertexBuffer.SetData(
-					0,
-					vertexInfo,
-					0,
-					1,
-					VertexPositionColorTexture4.RealStride,
-					SetDataOptions.None
-				);
-				DrawPrimitives(texture, 0, 1);
-			}
+			    unsafe {
+			        fixed (void* data = vertexInfo) {
+			            vertexBuffer.SetData(
+			                0,
+			                data,
+                            sizeof(VertexPositionColorTexture4),
+			                0,
+			                1,
+			                VertexPositionColorTexture4.RealStride,
+			                SetDataOptions.None
+			                );
+			        }
+			        DrawPrimitives(texture, 0, 1);
+			    }
 			else
 			{
 				textureInfo[numSprites] = texture;

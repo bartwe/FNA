@@ -403,7 +403,7 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public IALBuffer ConvertStereoToMono(IALBuffer buffer)
+		public unsafe IALBuffer ConvertStereoToMono(IALBuffer buffer)
 		{
 			OpenALBuffer buf = buffer as OpenALBuffer;
 			int bufLen, bits;
@@ -423,48 +423,44 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 
 			byte[] data = new byte[bufLen];
-			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-			IntPtr dataPtr = dataHandle.AddrOfPinnedObject();
-			ALEXT.alGetBufferSamplesSOFT(
-				buf.Handle,
-				0,
-				bufLen / bits / 2,
-				ALEXT.AL_STEREO_SOFT,
-				bits == 2 ? ALEXT.AL_SHORT_SOFT : ALEXT.AL_BYTE_SOFT,
-				dataPtr
-			);
-#if VERBOSE_AL_DEBUGGING
-			CheckALError();
-#endif
+            byte[] monoData = new byte[bufLen / 2];
+            fixed (void* datap = data) {
+                var dataPtr = (IntPtr)datap;
+			    ALEXT.alGetBufferSamplesSOFT(
+				    buf.Handle,
+				    0,
+				    bufLen / bits / 2,
+				    ALEXT.AL_STEREO_SOFT,
+				    bits == 2 ? ALEXT.AL_SHORT_SOFT : ALEXT.AL_BYTE_SOFT,
+				    dataPtr
+			    );
+    #if VERBOSE_AL_DEBUGGING
+			    CheckALError();
+    #endif
 
-			byte[] monoData = new byte[bufLen / 2];
-			GCHandle monoHandle = GCHandle.Alloc(monoData, GCHandleType.Pinned);
-			IntPtr monoPtr = monoHandle.AddrOfPinnedObject();
-			unsafe
-			{
-				if (bits == 2)
-				{
-					short* src = (short*) dataPtr;
-					short* dst = (short*) monoPtr;
-					for (int i = 0; i < monoData.Length / 2; i += 1)
-					{
-						dst[i] = (short) (((int) src[0] + (int) src[1]) / 2);
-						src += 2;
-					}
-				}
-				else
-				{
-					sbyte* src = (sbyte*) dataPtr;
-					sbyte* dst = (sbyte*) monoPtr;
-					for (int i = 0; i < monoData.Length; i += 1)
-					{
-						dst[i] = (sbyte) (((short) src[0] + (short) src[1]) / 2);
-						src += 2;
-					}
-				}
-			}
-			monoHandle.Free();
-			dataHandle.Free();
+                fixed (void* monoPtr = monoData) {
+				    if (bits == 2)
+				    {
+					    short* src = (short*) dataPtr;
+					    short* dst = (short*) monoPtr;
+					    for (int i = 0; i < monoData.Length / 2; i += 1)
+					    {
+						    dst[i] = (short) (((int) src[0] + (int) src[1]) / 2);
+						    src += 2;
+					    }
+				    }
+				    else
+				    {
+					    sbyte* src = (sbyte*) dataPtr;
+					    sbyte* dst = (sbyte*) monoPtr;
+					    for (int i = 0; i < monoData.Length; i += 1)
+					    {
+						    dst[i] = (sbyte) (((short) src[0] + (short) src[1]) / 2);
+						    src += 2;
+					    }
+				    }
+			    }
+            }
 			data = null;
 
 			return GenBuffer(
