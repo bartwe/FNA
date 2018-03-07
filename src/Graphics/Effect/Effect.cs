@@ -85,6 +85,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
+        private Dictionary<IntPtr, string> samplerKeyMapping = new Dictionary<IntPtr, string>();
 
 		private unsafe MojoShader.MOJOSHADER_effectStateChanges* stateChanges;
 
@@ -863,9 +864,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					MojoShader.MOJOSHADER_samplerStateType type = states[j].type;
 					if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_TEXTURE)
 					{
-						string samplerName = Marshal.PtrToStringAnsi(
-							registers[i].sampler_name
-						);
+					    string samplerName;
+					    if (!samplerKeyMapping.TryGetValue(registers[i].sampler_name, out samplerName)) {
+					        samplerName = Marshal.PtrToStringAnsi(
+					            registers[i].sampler_name
+					            );
+					        samplerKeyMapping.Add(registers[i].sampler_name, samplerName);
+					    }
 					    EffectParameter value;
 					    if (samplerMap.TryGetValue(samplerName, out value))
 						{
