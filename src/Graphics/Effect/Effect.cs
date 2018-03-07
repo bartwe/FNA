@@ -85,9 +85,19 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
-        private Dictionary<IntPtr, string> samplerKeyMapping = new Dictionary<IntPtr, string>();
+        private Dictionary<IntPtr, string> samplerKeyMapping = new Dictionary<IntPtr, string>(new IntPtrEqualsityComparer());
 
-		private unsafe MojoShader.MOJOSHADER_effectStateChanges* stateChanges;
+	    class IntPtrEqualsityComparer : IEqualityComparer<IntPtr> {
+	        public bool Equals(IntPtr x, IntPtr y) {
+	            return x == y;
+	        }
+
+	        public int GetHashCode(IntPtr obj) {
+	            return obj.GetHashCode();
+	        }
+	    }
+
+	    private unsafe MojoShader.MOJOSHADER_effectStateChanges* stateChanges;
 
 		#endregion
 
