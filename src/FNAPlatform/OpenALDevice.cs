@@ -71,24 +71,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region OpenAL Source Container Class
-
-		private class OpenALSource : IALSource
-		{
-			public uint Handle
-			{
-				get;
-				private set;
-			}
-
-			public OpenALSource(uint handle)
-			{
-				Handle = handle;
-			}
-		}
-
-		#endregion
-
 		#region OpenAL Reverb Effect Container Class
 
 		private class OpenALReverb : IALReverb
@@ -478,7 +460,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region OpenAL Source Methods
 
-		public IALSource GenSource()
+		public ALSourceHandle GenSource()
 		{
 			uint result;
 			AL10.alGenSources(1, out result);
@@ -487,17 +469,17 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 			if (result == 0)
 			{
-				return null;
+                return ALSourceHandle.NullHandle;
 			}
 			AL10.alSourcef(
 				result,
 				AL10.AL_REFERENCE_DISTANCE,
 				AudioDevice.DistanceScale
 			);
-			return new OpenALSource(result);
+            return new ALSourceHandle(result);
 		}
 
-		public IALSource GenSource(IALBuffer buffer, bool isXACT)
+		public ALSourceHandle GenSource(IALBuffer buffer, bool isXACT)
 		{
 			uint result;
 			AL10.alGenSources(1, out result);
@@ -506,7 +488,7 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 			if (result == 0)
 			{
-				return null;
+                return ALSourceHandle.NullHandle;
 			}
 			AL10.alSourcei(
 				result,
@@ -529,12 +511,12 @@ namespace Microsoft.Xna.Framework.Audio
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
-			return new OpenALSource(result);
+            return new ALSourceHandle(result);
 		}
 
-		public void StopAndDisposeSource(IALSource source)
+		public void StopAndDisposeSource(ALSourceHandle sourceHandle)
 		{
-			uint handle = (source as OpenALSource).Handle;
+			uint handle = sourceHandle.Handle;
 			AL10.alSourceStop(handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
@@ -545,35 +527,35 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void PlaySource(IALSource source)
+		public void PlaySource(ALSourceHandle sourceHandle)
 		{
-			AL10.alSourcePlay((source as OpenALSource).Handle);
+			AL10.alSourcePlay(sourceHandle.Handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
 		}
 
-		public void PauseSource(IALSource source)
+		public void PauseSource(ALSourceHandle sourceHandle)
 		{
-			AL10.alSourcePause((source as OpenALSource).Handle);
+			AL10.alSourcePause(sourceHandle.Handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
 		}
 
-		public void ResumeSource(IALSource source)
+		public void ResumeSource(ALSourceHandle sourceHandle)
 		{
-			AL10.alSourcePlay((source as OpenALSource).Handle);
+			AL10.alSourcePlay(sourceHandle.Handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
 		}
 
-		public SoundState GetSourceState(IALSource source)
+		public SoundState GetSourceState(ALSourceHandle sourceHandle)
 		{
 			int state;
 			AL10.alGetSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_SOURCE_STATE,
 				out state
 			);
@@ -591,10 +573,10 @@ namespace Microsoft.Xna.Framework.Audio
 			return SoundState.Stopped;
 		}
 
-		public void SetSourceVolume(IALSource source, float volume)
+		public void SetSourceVolume(ALSourceHandle sourceHandle, float volume)
 		{
 			AL10.alSourcef(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_GAIN,
 				volume * SoundEffect.MasterVolume // FIXME: alListener(AL_GAIN) -flibit
 			);
@@ -603,10 +585,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceLooped(IALSource source, bool looped)
+		public void SetSourceLooped(ALSourceHandle sourceHandle, bool looped)
 		{
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_LOOPING,
 				looped ? 1 : 0
 			);
@@ -615,10 +597,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourcePan(IALSource source, float pan)
+		public void SetSourcePan(ALSourceHandle sourceHandle, float pan)
 		{
 			AL10.alSource3f(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_POSITION,
 				pan,
 				0.0f,
@@ -629,10 +611,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourcePosition(IALSource source, Vector3 pos)
+		public void SetSourcePosition(ALSourceHandle sourceHandle, Vector3 pos)
 		{
 			AL10.alSource3f(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_POSITION,
 				pos.X,
 				pos.Y,
@@ -643,7 +625,7 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourcePitch(IALSource source, float pitch, bool clamp)
+		public void SetSourcePitch(ALSourceHandle sourceHandle, float pitch, bool clamp)
 		{
 			/* XNA sets pitch bounds to [-1.0f, 1.0f], each end being one octave.
 			 * OpenAL's AL_PITCH boundaries are (0.0f, INF).
@@ -661,7 +643,7 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new IndexOutOfRangeException("XNA PITCH MUST BE WITHIN [-1.0f, 1.0f]!");
 			}
 			AL10.alSourcef(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_PITCH,
 				(float) Math.Pow(2, pitch)
 			);
@@ -670,10 +652,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceReverb(IALSource source, IALReverb reverb)
+		public void SetSourceReverb(ALSourceHandle sourceHandle, IALReverb reverb)
 		{
 			AL10.alSource3i(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_AUXILIARY_SEND_FILTER,
 				(int) (reverb as OpenALReverb).SlotHandle,
 				0,
@@ -684,12 +666,12 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceLowPassFilter(IALSource source, float hfGain)
+		public void SetSourceLowPassFilter(ALSourceHandle sourceHandle, float hfGain)
 		{
 			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_LOWPASS);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_LOWPASS_GAINHF, hfGain);
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
@@ -698,12 +680,12 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceHighPassFilter(IALSource source, float lfGain)
+		public void SetSourceHighPassFilter(ALSourceHandle sourceHandle, float lfGain)
 		{
 			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_HIGHPASS);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_HIGHPASS_GAINLF, lfGain);
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
@@ -712,13 +694,13 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceBandPassFilter(IALSource source, float hfGain, float lfGain)
+		public void SetSourceBandPassFilter(ALSourceHandle sourceHandle, float hfGain, float lfGain)
 		{
 			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_BANDPASS);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_BANDPASS_GAINHF, hfGain);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_BANDPASS_GAINLF, lfGain);
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
@@ -727,11 +709,11 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void QueueSourceBuffer(IALSource source, IALBuffer buffer)
+		public void QueueSourceBuffer(ALSourceHandle sourceHandle, IALBuffer buffer)
 		{
 			uint buf = (buffer as OpenALBuffer).Handle;
 			AL10.alSourceQueueBuffers(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				1,
 				ref buf
 			);
@@ -741,13 +723,13 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void DequeueSourceBuffers(
-			IALSource source,
+			ALSourceHandle sourceHandle,
 			int buffersToDequeue,
 			Queue<IALBuffer> errorCheck
 		) {
 			uint[] bufs = new uint[buffersToDequeue];
 			AL10.alSourceUnqueueBuffers(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				buffersToDequeue,
 				bufs
 			);
@@ -767,11 +749,11 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public int CheckProcessedBuffers(IALSource source)
+		public int CheckProcessedBuffers(ALSourceHandle sourceHandle)
 		{
 			int result;
 			AL10.alGetSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_BUFFERS_PROCESSED,
 				out result
 			);
@@ -782,7 +764,7 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void GetBufferData(
-			IALSource source,
+			ALSourceHandle sourceHandle,
 			IALBuffer[] buffer,
 			IntPtr samples,
 			int samplesLen,
@@ -794,7 +776,7 @@ namespace Microsoft.Xna.Framework.Audio
 			// Where are we now?
 			int offset;
 			AL10.alGetSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL11.AL_SAMPLE_OFFSET,
 				out offset
 			);

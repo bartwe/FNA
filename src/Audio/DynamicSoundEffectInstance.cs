@@ -171,18 +171,18 @@ namespace Microsoft.Xna.Framework.Audio
 			handle.Free();
 
 			// If we're already playing, queue immediately.
-			if (INTERNAL_alSource != null)
+			if (!InternalAlSourceHandle.IsNull())
 			{
 				AudioDevice.ALDevice.QueueSourceBuffer(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					newBuf
 				);
 				queuedBuffers.Enqueue(newBuf);
 
 				// If the source stopped, reboot it now.
-				if (AudioDevice.ALDevice.GetSourceState(INTERNAL_alSource) == SoundState.Stopped)
+				if (AudioDevice.ALDevice.GetSourceState(InternalAlSourceHandle) == SoundState.Stopped)
 				{
-					AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
+					AudioDevice.ALDevice.PlaySource(InternalAlSourceHandle);
 				}
 			}
 			else
@@ -219,11 +219,11 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 			}
 
-			if (INTERNAL_alSource != null)
+            if (!InternalAlSourceHandle.IsNull())
 			{
 				// The sound has stopped, but hasn't cleaned up yet...
-				AudioDevice.ALDevice.StopAndDisposeSource(INTERNAL_alSource);
-				INTERNAL_alSource = null;
+				AudioDevice.ALDevice.StopAndDisposeSource(InternalAlSourceHandle);
+				InternalAlSourceHandle = ALSourceHandle.NullHandle;
 			}
 			while (queuedBuffers.Count > 0)
 			{
@@ -236,8 +236,8 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new NoAudioHardwareException();
 			}
 
-			INTERNAL_alSource = AudioDevice.ALDevice.GenSource();
-			if (INTERNAL_alSource == null)
+			InternalAlSourceHandle = AudioDevice.ALDevice.GenSource();
+			if (InternalAlSourceHandle.IsNull())
 			{
 				FNALoggerEXT.LogWarn("AL SOURCE WAS NOT AVAILABLE, SKIPPING.");
 				return;
@@ -248,7 +248,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				IALBuffer nextBuf = buffersToQueue.Dequeue();
 				queuedBuffers.Enqueue(nextBuf);
-				AudioDevice.ALDevice.QueueSourceBuffer(INTERNAL_alSource, nextBuf);
+				AudioDevice.ALDevice.QueueSourceBuffer(InternalAlSourceHandle, nextBuf);
 			}
 
 			// Apply Pan/Position
@@ -256,7 +256,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				INTERNAL_positionalAudio = false;
 				AudioDevice.ALDevice.SetSourcePosition(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					position
 				);
 			}
@@ -279,7 +279,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Finally.
-			AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
+			AudioDevice.ALDevice.PlaySource(InternalAlSourceHandle);
 			if (isManaged)
 			{
 				AudioDevice.DynamicInstancePool.Add(this);
@@ -294,7 +294,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			// Get the number of processed buffers.
 			int finishedBuffers = AudioDevice.ALDevice.CheckProcessedBuffers(
-				INTERNAL_alSource
+				InternalAlSourceHandle
 			);
 			if (finishedBuffers == 0)
 			{
@@ -304,7 +304,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// Dequeue the processed buffers, error checking as needed.
 			AudioDevice.ALDevice.DequeueSourceBuffers(
-				INTERNAL_alSource,
+				InternalAlSourceHandle,
 				finishedBuffers,
 				queuedBuffers
 			);
@@ -338,11 +338,11 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal void GetSamples(float[] samples)
 		{
-			if (INTERNAL_alSource != null && queuedBuffers.Count > 0)
+			if ((!InternalAlSourceHandle.IsNull()) && queuedBuffers.Count > 0)
 			{
 				GCHandle handle = GCHandle.Alloc(samples, GCHandleType.Pinned);
 				AudioDevice.ALDevice.GetBufferData(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					queuedBuffers.ToArray(), // FIXME: Blech -flibit
 					handle.AddrOfPinnedObject(),
 					samples.Length,
@@ -390,18 +390,18 @@ namespace Microsoft.Xna.Framework.Audio
 			handle.Free();
 
 			// If we're already playing, queue immediately.
-			if (INTERNAL_alSource != null)
+            if (!InternalAlSourceHandle.IsNull())
 			{
 				AudioDevice.ALDevice.QueueSourceBuffer(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					newBuf
 				);
 				queuedBuffers.Enqueue(newBuf);
 
 				// If the source stopped, reboot it now.
-				if (AudioDevice.ALDevice.GetSourceState(INTERNAL_alSource) == SoundState.Stopped)
+				if (AudioDevice.ALDevice.GetSourceState(InternalAlSourceHandle) == SoundState.Stopped)
 				{
-					AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
+					AudioDevice.ALDevice.PlaySource(InternalAlSourceHandle);
 				}
 			}
 			else

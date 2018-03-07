@@ -34,10 +34,10 @@ namespace Microsoft.Xna.Framework.Audio
 			set
 			{
 				INTERNAL_looped = value;
-				if (INTERNAL_alSource != null)
+                if (!InternalAlSourceHandle.IsNull())
 				{
 					AudioDevice.ALDevice.SetSourceLooped(
-						INTERNAL_alSource,
+						InternalAlSourceHandle,
 						value
 					);
 				}
@@ -54,10 +54,10 @@ namespace Microsoft.Xna.Framework.Audio
 			set
 			{
 				INTERNAL_pan = value;
-				if (INTERNAL_alSource != null)
+                if (!InternalAlSourceHandle.IsNull())
 				{
 					AudioDevice.ALDevice.SetSourcePan(
-						INTERNAL_alSource,
+						InternalAlSourceHandle,
 						value
 					);
 				}
@@ -82,10 +82,10 @@ namespace Microsoft.Xna.Framework.Audio
 					value = MathHelper.Clamp(value, -1.0f, 1.0f);
 				}
 				INTERNAL_pitch = value;
-				if (INTERNAL_alSource != null)
+                if (!InternalAlSourceHandle.IsNull())
 				{
 					AudioDevice.ALDevice.SetSourcePitch(
-						INTERNAL_alSource,
+						InternalAlSourceHandle,
 						value,
 						!INTERNAL_isXACTSource
 					);
@@ -97,12 +97,12 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			get
 			{
-				if (INTERNAL_alSource == null)
+                if (InternalAlSourceHandle.IsNull())
 				{
 					return SoundState.Stopped;
 				}
 				SoundState result = AudioDevice.ALDevice.GetSourceState(
-					INTERNAL_alSource
+					InternalAlSourceHandle
 				);
 				if (result == SoundState.Stopped && isDynamic)
 				{
@@ -127,10 +127,10 @@ namespace Microsoft.Xna.Framework.Audio
 					value = MathHelper.Clamp(value, 0.0f, 1.0f);
 				}
 				INTERNAL_volume = value;
-				if (INTERNAL_alSource != null)
+                if (!InternalAlSourceHandle.IsNull())
 				{
 					AudioDevice.ALDevice.SetSourceVolume(
-						INTERNAL_alSource,
+						InternalAlSourceHandle,
 						value
 					);
 				}
@@ -170,7 +170,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private Variables: AL Source, EffectSlot
 
-		internal IALSource INTERNAL_alSource;
+		internal ALSourceHandle InternalAlSourceHandle;
 		private IALReverb INTERNAL_alReverb;
 
 		#endregion
@@ -251,11 +251,11 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// This can get called before Play()...
-			if (INTERNAL_alSource != null)
+            if (!InternalAlSourceHandle.IsNull())
 			{
 				// Finally.
 				AudioDevice.ALDevice.SetSourcePosition(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					position
 				);
 			}
@@ -286,11 +286,11 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 			}
 
-			if (INTERNAL_alSource != null)
+			if (!InternalAlSourceHandle.IsNull())
 			{
 				// The sound has stopped, but hasn't cleaned up yet...
-				AudioDevice.ALDevice.StopAndDisposeSource(INTERNAL_alSource);
-				INTERNAL_alSource = null;
+				AudioDevice.ALDevice.StopAndDisposeSource(InternalAlSourceHandle);
+				InternalAlSourceHandle = ALSourceHandle.NullHandle;
 			}
 
 			IALBuffer srcBuf;
@@ -302,11 +302,11 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				srcBuf = INTERNAL_parentEffect.INTERNAL_buffer;
 			}
-			INTERNAL_alSource = AudioDevice.ALDevice.GenSource(
+			InternalAlSourceHandle = AudioDevice.ALDevice.GenSource(
 				srcBuf,
 				INTERNAL_isXACTSource
 			);
-			if (INTERNAL_alSource == null)
+            if (InternalAlSourceHandle.IsNull())
 			{
 				FNALoggerEXT.LogWarn("AL SOURCE WAS NOT AVAILABLE, SKIPPING.");
 				return;
@@ -316,7 +316,7 @@ namespace Microsoft.Xna.Framework.Audio
 			if (INTERNAL_positionalAudio)
 			{
 				AudioDevice.ALDevice.SetSourcePosition(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					position
 				);
 			}
@@ -334,50 +334,50 @@ namespace Microsoft.Xna.Framework.Audio
 			if (INTERNAL_alReverb != null)
 			{
 				AudioDevice.ALDevice.SetSourceReverb(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					INTERNAL_alReverb
 				);
 			}
 
-			AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
+			AudioDevice.ALDevice.PlaySource(InternalAlSourceHandle);
 		}
 
 		public void Pause()
 		{
-			if (INTERNAL_alSource != null && State == SoundState.Playing)
+            if ((!InternalAlSourceHandle.IsNull()) && State == SoundState.Playing)
 			{
-				AudioDevice.ALDevice.PauseSource(INTERNAL_alSource);
+				AudioDevice.ALDevice.PauseSource(InternalAlSourceHandle);
 			}
 		}
 
 		public void Resume()
 		{
-			if (INTERNAL_alSource == null)
+            if (InternalAlSourceHandle.IsNull())
 			{
 				// XNA4 just plays if we've not started yet.
 				Play();
 			}
 			else if (State == SoundState.Paused)
 			{
-				AudioDevice.ALDevice.ResumeSource(INTERNAL_alSource);
+				AudioDevice.ALDevice.ResumeSource(InternalAlSourceHandle);
 			}
 		}
 
 		public void Stop()
 		{
-			if (INTERNAL_alSource != null)
+			if (!InternalAlSourceHandle.IsNull())
 			{
 				// TODO: GraphicsResource-like reference management -flibit
 				if (AudioDevice.ALDevice != null)
 				{
-					AudioDevice.ALDevice.StopAndDisposeSource(INTERNAL_alSource);
+					AudioDevice.ALDevice.StopAndDisposeSource(InternalAlSourceHandle);
 					DynamicSoundEffectInstance dsfi = this as DynamicSoundEffectInstance;
 					if (dsfi != null && AudioDevice.DynamicInstancePool.Contains(dsfi))
 					{
 						AudioDevice.DynamicInstancePool.Remove(dsfi);
 					}
 				}
-				INTERNAL_alSource = null;
+                InternalAlSourceHandle = ALSourceHandle.NullHandle;
 			}
 		}
 
@@ -393,10 +393,10 @@ namespace Microsoft.Xna.Framework.Audio
 		internal void INTERNAL_applyReverb(IALReverb reverb)
 		{
 			INTERNAL_alReverb = reverb;
-			if (INTERNAL_alSource != null)
+            if (!InternalAlSourceHandle.IsNull())
 			{
 				AudioDevice.ALDevice.SetSourceReverb(
-					INTERNAL_alSource,
+					InternalAlSourceHandle,
 					INTERNAL_alReverb
 				);
 			}
@@ -404,25 +404,25 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal void INTERNAL_applyLowPassFilter(float hfGain)
 		{
-			if (INTERNAL_alSource != null)
+            if (!InternalAlSourceHandle.IsNull())
 			{
-				AudioDevice.ALDevice.SetSourceLowPassFilter(INTERNAL_alSource, hfGain);
+				AudioDevice.ALDevice.SetSourceLowPassFilter(InternalAlSourceHandle, hfGain);
 			}
 		}
 
 		internal void INTERNAL_applyHighPassFilter(float lfGain)
 		{
-			if (INTERNAL_alSource != null)
+            if (!InternalAlSourceHandle.IsNull())
 			{
-				AudioDevice.ALDevice.SetSourceHighPassFilter(INTERNAL_alSource, lfGain);
+				AudioDevice.ALDevice.SetSourceHighPassFilter(InternalAlSourceHandle, lfGain);
 			}
 		}
 
 		internal void INTERNAL_applyBandPassFilter(float hfGain, float lfGain)
 		{
-			if (INTERNAL_alSource != null)
+            if (!InternalAlSourceHandle.IsNull())
 			{
-				AudioDevice.ALDevice.SetSourceBandPassFilter(INTERNAL_alSource, hfGain, lfGain);
+				AudioDevice.ALDevice.SetSourceBandPassFilter(InternalAlSourceHandle, hfGain, lfGain);
 			}
 		}
 
