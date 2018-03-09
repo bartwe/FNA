@@ -85,7 +85,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
-        private Dictionary<IntPtr, string> samplerKeyMapping = new Dictionary<IntPtr, string>(new IntPtrEqualsityComparer());
+        private Dictionary<IntPtr, EffectParameter> samplerKeyMapping = new Dictionary<IntPtr, EffectParameter>(new IntPtrEqualsityComparer());
 
 	    class IntPtrEqualsityComparer : IEqualityComparer<IntPtr> {
 	        public bool Equals(IntPtr x, IntPtr y) {
@@ -874,23 +874,19 @@ namespace Microsoft.Xna.Framework.Graphics
 					MojoShader.MOJOSHADER_samplerStateType type = states[j].type;
 					if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_TEXTURE)
 					{
-					    string samplerName;
-					    if (!samplerKeyMapping.TryGetValue(registers[i].sampler_name, out samplerName)) {
-					        samplerName = Marshal.PtrToStringAnsi(
+                        EffectParameter value;
+                        if (!samplerKeyMapping.TryGetValue(registers[i].sampler_name, out value)) {
+					        var samplerName = Marshal.PtrToStringAnsi(
 					            registers[i].sampler_name
 					            );
-					        samplerKeyMapping.Add(registers[i].sampler_name, samplerName);
+                            samplerMap.TryGetValue(samplerName, out value);
+                            samplerKeyMapping.Add(registers[i].sampler_name, value);
 					    }
-					    EffectParameter value;
-					    if (samplerMap.TryGetValue(samplerName, out value))
-						{
-							Texture texture = value.texture;
-							if (texture != null)
-							{
-								textures[register] = texture;
-							}
-						}
-					}
+                        Texture texture = value.texture;
+                        if (texture != null) {
+                            textures[register] = texture;
+                        }
+     				}
 					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSU)
 					{
 						MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
