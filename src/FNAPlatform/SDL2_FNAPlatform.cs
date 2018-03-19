@@ -2188,7 +2188,9 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Keycode.SDLK_SLEEP,		Keys.Sleep },
 			{ (int) SDL.SDL_Keycode.SDLK_TAB,		Keys.Tab },
 			{ (int) SDL.SDL_Keycode.SDLK_BACKQUOTE,		Keys.OemTilde },
-			{ '²' /* FIXME: AZERTY SDL2? -flibit */,	Keys.OemTilde },
+            { (int) SDL.SDL_Keycode.SDLK_VOLUMEUP,      Keys.VolumeUp },
+            { (int) SDL.SDL_Keycode.SDLK_VOLUMEDOWN,      Keys.VolumeDown },
+            { '²' /* FIXME: AZERTY SDL2? -flibit */,	Keys.OemTilde },
 			{ 'é' /* FIXME: BEPO SDL2? -flibit */,		Keys.None },
 			{ '|' /* FIXME: Norwegian SDL2? -flibit */,	Keys.OemPipe },
 			{ '+' /* FIXME: Norwegian SDL2? -flibit */,	Keys.OemPlus },
@@ -2317,8 +2319,10 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_SLEEP,		Keys.Sleep },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_TAB,		Keys.Tab },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_GRAVE,		Keys.OemTilde },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN,		Keys.None }
-		};
+            { (int) SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN,      Keys.None },
+            { (int) SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEUP,      Keys.VolumeUp },
+            { (int) SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN,      Keys.VolumeDown }
+        };
 		private static Dictionary<int, SDL.SDL_Scancode> INTERNAL_xnaMap = new Dictionary<int, SDL.SDL_Scancode>()
 		{
 			{ (int) Keys.A,			SDL.SDL_Scancode.SDL_SCANCODE_A },
@@ -2438,8 +2442,10 @@ namespace Microsoft.Xna.Framework
 			{ (int) Keys.Sleep,		SDL.SDL_Scancode.SDL_SCANCODE_SLEEP },
 			{ (int) Keys.Tab,		SDL.SDL_Scancode.SDL_SCANCODE_TAB },
 			{ (int) Keys.OemTilde,		SDL.SDL_Scancode.SDL_SCANCODE_GRAVE },
-			{ (int) Keys.None,		SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN }
-		};
+			{ (int) Keys.None,		SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN },
+            { (int) Keys.VolumeUp,      SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEUP },
+            { (int) Keys.VolumeDown,      SDL.SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN }
+        };
 
 		private static Keys ToXNAKey(ref SDL.SDL_Keysym key)
 		{
