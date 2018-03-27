@@ -1399,7 +1399,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #if DEBUG
 			/* ARB_debug_output, for debug contexts */
 			IntPtr messageCallback = SDL.SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
-			IntPtr messageControl = SDL.SDL_GL_GetProcAddress("glDebugMessageControlARB");
+            IntPtr messageControl = SDL.SDL_GL_GetProcAddress("glDebugMessageControlARB");
 			if (messageCallback == IntPtr.Zero || messageControl == IntPtr.Zero)
 			{
 				FNALoggerEXT.LogWarn("ARB_debug_output not supported!");
@@ -1407,11 +1407,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			else
 			{
 				glDebugMessageCallbackARB = (DebugMessageCallback) GetDelegateFromSDL(
-					messageCallback,
+                    "glDebugMessageCallbackARB",
 					typeof(DebugMessageCallback)
 				);
 				glDebugMessageControlARB = (DebugMessageControl) GetDelegateFromSDL(
-					messageControl,
+                    "glDebugMessageControlARB",
 					typeof(DebugMessageControl)
 				);
 				glDebugMessageControlARB(
@@ -1450,7 +1450,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			else
 			{
 				glStringMarkerGREMEDY = (StringMarkerGREMEDY) GetDelegateFromSDL(
-					stringMarkerCallback,
+					"glStringMarkerGREMEDY",
 					typeof(StringMarkerGREMEDY)
 				);
 			}
