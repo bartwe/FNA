@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using SDL2;
 #endregion
@@ -855,9 +856,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			if (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
 			{
 				FNALoggerEXT.LogError(err);
-				throw new InvalidOperationException("ARB_debug_output found an error: " + err);
+                if (Debugger.IsAttached)
+				    throw new InvalidOperationException("ARB_debug_output found an error: " + err);
 			}
-			FNALoggerEXT.LogWarn(err);
+            else
+			    FNALoggerEXT.LogWarn(err);
 		}
 
 		/* END DEBUG OUTPUT FUNCTIONS */
