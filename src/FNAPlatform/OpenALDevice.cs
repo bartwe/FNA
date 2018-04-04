@@ -1212,6 +1212,120 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private OpenAL Error Check Methods
 
+        
+	    public static string ALEnumToString(int alEnum) {
+	        switch (alEnum) {
+	                //case AL_NONE: return "AL_NONE"; 
+	                //case AL_FALSE : return ""; 
+	            case AL10.AL_TRUE:
+                    return "AL_TRUE";
+	            case AL10.AL_SOURCE_RELATIVE:
+	                return "AL_SOURCE_RELATIVE";
+	            case AL10.AL_CONE_INNER_ANGLE:
+	                return "AL_CONE_INNER_ANGLE";
+	            case AL10.AL_CONE_OUTER_ANGLE:
+	                return "AL_CONE_OUTER_ANGLE";
+	            case AL10.AL_PITCH:
+	                return "AL_PITCH";
+	            case AL10.AL_POSITION:
+	                return "AL_POSITION";
+	            case AL10.AL_DIRECTION:
+	                return "AL_DIRECTION";
+	            case AL10.AL_VELOCITY:
+	                return "AL_VELOCITY";
+	            case AL10.AL_LOOPING:
+	                return "AL_LOOPING";
+	            case AL10.AL_BUFFER:
+	                return "AL_BUFFER";
+	            case AL10.AL_GAIN:
+	                return "AL_GAIN";
+	            case AL10.AL_MIN_GAIN:
+	                return "AL_MIN_GAIN";
+	            case AL10.AL_MAX_GAIN:
+	                return "AL_MAX_GAIN";
+	            case AL10.AL_ORIENTATION:
+	                return "AL_ORIENTATION";
+	            case AL10.AL_SOURCE_STATE:
+	                return "AL_SOURCE_STATE";
+	            case AL10.AL_INITIAL:
+	                return "AL_INITIAL";
+	            case AL10.AL_PLAYING:
+	                return "AL_PLAYING";
+	            case AL10.AL_PAUSED:
+	                return "AL_PAUSED";
+	            case AL10.AL_STOPPED:
+	                return "AL_STOPPED";
+	            case AL10.AL_BUFFERS_QUEUED:
+	                return "AL_BUFFERS_QUEUED";
+	            case AL10.AL_BUFFERS_PROCESSED:
+	                return "AL_BUFFERS_PROCESSED";
+	            case AL10.AL_REFERENCE_DISTANCE:
+	                return "AL_REFERENCE_DISTANCE";
+	            case AL10.AL_ROLLOFF_FACTOR:
+	                return "AL_ROLLOFF_FACTOR";
+	            case AL10.AL_CONE_OUTER_GAIN:
+	                return "AL_CONE_OUTER_GAIN";
+	            case AL10.AL_MAX_DISTANCE:
+	                return "AL_MAX_DISTANCE";
+	            case AL10.AL_SOURCE_TYPE:
+	                return "AL_SOURCE_TYPE";
+	            case AL10.AL_STATIC:
+	                return "AL_STATIC";
+	            case AL10.AL_STREAMING:
+	                return "AL_STREAMING";
+	            case AL10.AL_UNDETERMINED:
+	                return "AL_UNDETERMINED";
+	            case AL10.AL_FORMAT_MONO8:
+	                return "AL_FORMAT_MONO8";
+	            case AL10.AL_FORMAT_MONO16:
+	                return "AL_FORMAT_MONO16";
+	            case AL10.AL_FORMAT_STEREO8:
+	                return "AL_FORMAT_STEREO8";
+	            case AL10.AL_FORMAT_STEREO16:
+	                return "AL_FORMAT_STEREO16";
+	            case AL10.AL_FREQUENCY:
+	                return "AL_FREQUENCY";
+	            case AL10.AL_BITS:
+	                return "AL_BITS";
+	            case AL10.AL_CHANNELS:
+	                return "AL_CHANNELS";
+	            case AL10.AL_SIZE:
+	                return "AL_SIZE";
+	            case AL10.AL_NO_ERROR:
+	                return "AL_NO_ERROR";
+	            case AL10.AL_INVALID_NAME:
+	                return "AL_INVALID_NAME";
+	            case AL10.AL_INVALID_ENUM:
+	                return "AL_INVALID_ENUM";
+	            case AL10.AL_INVALID_VALUE:
+	                return "AL_INVALID_VALUE";
+	            case AL10.AL_INVALID_OPERATION:
+	                return "AL_INVALID_OPERATION";
+	            case AL10.AL_OUT_OF_MEMORY:
+	                return "AL_OUT_OF_MEMORY";
+	            case AL10.AL_VENDOR:
+	                return "AL_VENDOR";
+	            case AL10.AL_VERSION:
+	                return "AL_VERSION";
+	            case AL10.AL_RENDERER:
+	                return "AL_RENDERER";
+	            case AL10.AL_EXTENSIONS:
+	                return "AL_EXTENSIONS";
+	            case AL10.AL_DOPPLER_FACTOR:
+	                return "AL_DOPPLER_FACTOR";
+	            case AL10.AL_DOPPLER_VELOCITY:
+	                return "AL_DOPPLER_VELOCITY";
+	            case AL10.AL_DISTANCE_MODEL:
+	                return "AL_DISTANCE_MODEL";
+	            case AL10.AL_INVERSE_DISTANCE:
+	                return "AL_INVERSE_DISTANCE";
+	            case AL10.AL_INVERSE_DISTANCE_CLAMPED:
+	                return "AL_INVERSE_DISTANCE_CLAMPED";
+                default:
+                    return "ALEnum: "+ alEnum.ToString("X4");
+	        }
+        }
+
 		private void CheckALError()
 		{
 			int err = AL10.alGetError();
@@ -1221,12 +1335,52 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 			}
 
-			FNALoggerEXT.LogError("OpenAL Error: " + err.ToString("X4"));
+			FNALoggerEXT.LogError("OpenAL Error: " + ALEnumToString(err));
 #if VERBOSE_AL_DEBUGGING
-			throw new InvalidOperationException("OpenAL Error!");
+			89throw new InvalidOperationException("OpenAL Error! " + AL10.ALEnumToString(err));
 #endif
-		}
+        }
 
+
+
+        public static string ALCEnumToString(int alcEnum) {
+            switch (alcEnum) {
+                //case ALC_FALSE:
+                //    return "ALC_FALSE";
+                case ALC10.ALC_TRUE:
+                    return "ALC_TRUE";
+                case ALC10.ALC_FREQUENCY:
+                    return "ALC_FREQUENCY";
+                case ALC10.ALC_REFRESH:
+                    return "ALC_REFRESH";
+                case ALC10.ALC_SYNC:
+                    return "ALC_SYNC";
+                case ALC10.ALC_NO_ERROR:
+                    return "ALC_NO_ERROR";
+                case ALC10.ALC_INVALID_DEVICE:
+                    return "ALC_INVALID_DEVICE";
+                case ALC10.ALC_INVALID_CONTEXT:
+                    return "ALC_INVALID_CONTEXT";
+                case ALC10.ALC_INVALID_ENUM:
+                    return "ALC_INVALID_ENUM";
+                case ALC10.ALC_INVALID_VALUE:
+                    return "ALC_INVALID_VALUE";
+                case ALC10.ALC_OUT_OF_MEMORY:
+                    return "ALC_OUT_OF_MEMORY";
+                case ALC10.ALC_ATTRIBUTES_SIZE:
+                    return "ALC_ATTRIBUTES_SIZE";
+                case ALC10.ALC_ALL_ATTRIBUTES:
+                    return "ALC_ALL_ATTRIBUTES";
+                case ALC10.ALC_DEFAULT_DEVICE_SPECIFIER:
+                    return "ALC_DEFAULT_DEVICE_SPECIFIER";
+                case ALC10.ALC_DEVICE_SPECIFIER:
+                    return "ALC_DEVICE_SPECIFIER";
+                case ALC10.ALC_EXTENSIONS:
+                    return "ALC_EXTENSIONS";
+                default:
+                    return "ALCEnum: " + alcEnum.ToString("X4");
+            }
+        }
 		private bool CheckALCError()
 		{
 			int err = ALC10.alcGetError(alDevice);
@@ -1236,7 +1390,7 @@ namespace Microsoft.Xna.Framework.Audio
 				return false;
 			}
 
-			FNALoggerEXT.LogError("OpenAL Device Error: " + err.ToString("X4"));
+            FNALoggerEXT.LogError("OpenAL Device Error: " + ALCEnumToString(err));
 			return true;
 		}
 
