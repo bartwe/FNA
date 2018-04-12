@@ -214,7 +214,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_DEBUG_SEVERITY_HIGH_ARB =		0x9146,
 			GL_DEBUG_SEVERITY_MEDIUM_ARB =		0x9147,
 			GL_DEBUG_SEVERITY_LOW_ARB =		0x9148,
-			GL_DEBUG_SEVERITY_NOTIFICATION_ARB =	0x826B
+			GL_DEBUG_SEVERITY_NOTIFICATION_ARB =	0x826B,
+			GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB = 0x8242
 		}
 
 		// Entry Points
@@ -240,9 +241,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private delegate void Enable(GLenum cap);
 		private Enable glEnable;
+		private static Enable glEnableStatic;
 
 		private delegate void Disable(GLenum cap);
 		private Disable glDisable;
+		private static Disable glDisableStatic;
 
 		/* END ENABLE/DISABLE FUNCTIONS */
 
@@ -835,6 +838,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr userParam // const GLvoid*
 		);
 		private DebugProc DebugCall = DebugCallback;
+		enum DebugSyncState { Async, Sync, Disabled };
+		static DebugSyncState debugSyncState = DebugSyncState.Async;
 		private static void DebugCallback(
 			GLenum source,
 			GLenum type,
@@ -850,13 +855,29 @@ namespace Microsoft.Xna.Framework.Graphics
 				source.ToString() +
 				"\n\tType: " +
 				type.ToString() +
+				"\n\tId: " +
+				id.ToString("X") +
 				"\n\tSeverity: " +
 				severity.ToString()
 			);
 			if (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
 			{
+				bool forceAssert = debugSyncState != DebugSyncState.Disabled && err.Contains("frustum");
+
+				if (forceAssert) {
+					if (debugSyncState == DebugSyncState.Async) {
+						glEnableStatic(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+						debugSyncState = DebugSyncState.Sync;
+					}
+					else {
+						glDisableStatic(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+						debugSyncState = DebugSyncState.Disabled;
+					}
+				}
+
 				FNALoggerEXT.LogError(err);
-                if (Debugger.IsAttached)
+
+                if (Debugger.IsAttached || forceAssert)
 				    throw new InvalidOperationException("ARB_debug_output found an error: " + err);
 			}
             else
@@ -921,7 +942,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				glGetIntegerv = (GetIntegerv) GetDelegateFromSDL("glGetIntegerv",typeof(GetIntegerv));
 				glEnable = (Enable) GetDelegateFromSDL("glEnable",typeof(Enable));
 				glDisable = (Disable) GetDelegateFromSDL("glDisable",typeof(Disable));
+				glEnableStatic = glEnable;
+				glDisableStatic = glDisable;
 				glViewport = (G_Viewport) GetDelegateFromSDL("glViewport",typeof(G_Viewport));
+
 				glScissor = (Scissor) GetDelegateFromSDL("glScissor", typeof(Scissor));
 
                 glBlendColor = (BlendColor) GetDelegateFromSDL("glBlendColor",typeof(BlendColor));
