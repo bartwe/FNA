@@ -475,6 +475,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
+		public bool MultiSampleFailed
+		{
+			get;
+			private set;
+		}
+
 		private bool supportsMultisampling;
 		private bool supportsFauxBackbuffer;
 		private bool supportsBaseVertex;
@@ -561,6 +567,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			PresentationParameters presentationParameters,
 			GraphicsAdapter adapter
 		) {
+			This = this;
 			// Create OpenGL context
 			glContext = SDL.SDL_GL_CreateContext(
 				presentationParameters.DeviceWindowHandle

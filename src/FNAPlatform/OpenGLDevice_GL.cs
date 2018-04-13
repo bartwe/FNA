@@ -241,11 +241,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private delegate void Enable(GLenum cap);
 		private Enable glEnable;
-		private static Enable glEnableStatic;
 
 		private delegate void Disable(GLenum cap);
 		private Disable glDisable;
-		private static Disable glDisableStatic;
 
 		/* END ENABLE/DISABLE FUNCTIONS */
 
@@ -840,6 +838,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private DebugProc DebugCall = DebugCallback;
 		enum DebugSyncState { Async, Sync, Disabled };
 		static DebugSyncState debugSyncState = DebugSyncState.Async;
+		static OpenGLDevice This;
 		private static void DebugCallback(
 			GLenum source,
 			GLenum type,
@@ -862,15 +861,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			if (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
 			{
-				bool forceAssert = debugSyncState != DebugSyncState.Disabled && err.Contains("frustum");
+				var isSamplesError = err.Contains("SAMPLES");
+				if (isSamplesError)
+					This.MultiSampleFailed = true;
+
+				var isFrustumError = err.Contains("frustum");
+				var forceAssert = debugSyncState != DebugSyncState.Disabled && (isFrustumError || isSamplesError);
 
 				if (forceAssert) {
 					if (debugSyncState == DebugSyncState.Async) {
-						glEnableStatic(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+						This.glEnable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 						debugSyncState = DebugSyncState.Sync;
 					}
 					else {
-						glDisableStatic(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+						This.glDisable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 						debugSyncState = DebugSyncState.Disabled;
 					}
 				}
@@ -942,8 +946,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glGetIntegerv = (GetIntegerv) GetDelegateFromSDL("glGetIntegerv",typeof(GetIntegerv));
 				glEnable = (Enable) GetDelegateFromSDL("glEnable",typeof(Enable));
 				glDisable = (Disable) GetDelegateFromSDL("glDisable",typeof(Disable));
-				glEnableStatic = glEnable;
-				glDisableStatic = glDisable;
 				glViewport = (G_Viewport) GetDelegateFromSDL("glViewport",typeof(G_Viewport));
 
 				glScissor = (Scissor) GetDelegateFromSDL("glScissor", typeof(Scissor));
