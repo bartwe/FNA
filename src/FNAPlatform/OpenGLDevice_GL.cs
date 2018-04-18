@@ -861,27 +861,28 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			if (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
 			{
-				var isSamplesError = err.Contains("SAMPLES");
-				if (isSamplesError)
+				if (err.Contains("GL_INVALID_OPERATION") && err.Contains(" SAMPLES "))
 					This.MultiSampleFailed = true;
 
-				var isFrustumError = err.Contains("frustum");
-				var forceAssert = debugSyncState != DebugSyncState.Disabled && (isFrustumError || isSamplesError);
+				var logStack = false;
 
-				if (forceAssert) {
-					if (debugSyncState == DebugSyncState.Async) {
-						This.glEnable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-						debugSyncState = DebugSyncState.Sync;
-					}
-					else {
-						This.glDisable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-						debugSyncState = DebugSyncState.Disabled;
-					}
+				if (debugSyncState == DebugSyncState.Async) {
+					This.glEnable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+					debugSyncState = DebugSyncState.Sync;
 				}
+				else 
+				if (debugSyncState == DebugSyncState.Sync) {
+					This.glDisable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+					debugSyncState = DebugSyncState.Disabled;
+					logStack = true;
+				}
+
+				if (logStack)
+					err += "\n" + Environment.StackTrace;
 
 				FNALoggerEXT.LogError(err);
 
-                if (Debugger.IsAttached || forceAssert)
+                if (Debugger.IsAttached)
 				    throw new InvalidOperationException("ARB_debug_output found an error: " + err);
 			}
             else
