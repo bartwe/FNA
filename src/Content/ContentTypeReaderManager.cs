@@ -278,11 +278,14 @@ namespace Microsoft.Xna.Framework.Content
 		/// <returns>
 		/// A <see cref="System.String"/>
 		/// </returns>
-		internal static string PrepareType(string type)
+
+        static readonly string[] NestedMark = { "[[" };
+
+        internal static string PrepareType(string type)
 		{
 			// Needed to support nested types
 			int count = type.Split(
-				new[] {"[["},
+				NestedMark,
 				StringSplitOptions.None
 			).Length - 1;
 			string preparedType = type;

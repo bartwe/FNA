@@ -226,6 +226,8 @@ namespace Microsoft.Xna.Framework.Audio
 			return new OpenALBuffer(result, TimeSpan.Zero, (int) channels, sampleRate);
 		}
 
+        int[] _loopArgumentsSpare = new int[2];
+
 		public IALBuffer GenBuffer(
 			byte[] data,
 			uint sampleRate,
@@ -319,17 +321,17 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// Set the loop points, if applicable
 			if (loopStart > 0 || loopEnd > 0)
-			{
-				AL10.alBufferiv(
-					result,
-					ALEXT.AL_LOOP_POINTS_SOFT,
-					new int[]
-					{
-						(int) loopStart,
-						(int) loopEnd
-					}
-				);
-			}
+			    unsafe {
+                    _loopArgumentsSpare[0] = (int)loopStart;
+                    _loopArgumentsSpare[1] = (int)loopEnd;
+			        fixed (int* loopArgumentsp = _loopArgumentsSpare) {
+			            AL10.alBufferiv(
+			                result,
+			                ALEXT.AL_LOOP_POINTS_SOFT,
+                            loopArgumentsp
+			                );
+			        }
+			    }
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
@@ -1337,11 +1339,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 			FNALoggerEXT.LogError("OpenAL Error: " + ALEnumToString(err));
 #if VERBOSE_AL_DEBUGGING
-			89throw new InvalidOperationException("OpenAL Error! " + AL10.ALEnumToString(err));
+			throw new InvalidOperationException("OpenAL Error! " + AL10.ALEnumToString(err));
 #endif
         }
-
-
 
         public static string ALCEnumToString(int alcEnum) {
             switch (alcEnum) {
