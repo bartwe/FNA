@@ -954,12 +954,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					glEnable(GLenum.GL_SCISSOR_TEST);
 				}
 
-				SDL.SDL_GL_SwapWindow(
+                XSplit_GL_SwapWindow_WorkaroundFlag = true;
+                SDL.SDL_GL_SwapWindow(
 					overrideWindowHandle
 				);
-
-				BindFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
-			}
+                XSplit_GL_SwapWindow_WorkaroundFlag = false;
+                		BindFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
+                	}
 			else
 			{
 				// Nothing left to do, just swap!

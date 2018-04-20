@@ -215,8 +215,21 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_DEBUG_SEVERITY_MEDIUM_ARB =		0x9147,
 			GL_DEBUG_SEVERITY_LOW_ARB =		0x9148,
 			GL_DEBUG_SEVERITY_NOTIFICATION_ARB =	0x826B,
-			GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB = 0x8242
-		}
+			GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB = 0x8242,
+
+
+		    GL_NO_ERROR = 0,
+		    GL_INVALID_ENUM = 0x0500,
+		    GL_INVALID_VALUE = 0x0501,
+		    GL_INVALID_OPERATION = 0x0502,
+
+		    GL_STACK_OVERFLOW = 0x0503,
+		    GL_STACK_UNDERFLOW = 0x0504,
+		    GL_OUT_OF_MEMORY = 0x0505,
+		    GL_INVALID_FRAMEBUFFER_OPERATION = 0x0506,
+		    GL_CONTEXT_LOST = 0x0507,
+		    GL_TABLE_TOO_LARGE = 0x8031
+    }
 
 		// Entry Points
 
@@ -236,6 +249,19 @@ namespace Microsoft.Xna.Framework.Graphics
 		private GetIntegerv glGetIntegerv;
 
 		/* END GET FUNCTIONS */
+
+        private delegate GLenum GetError();
+        private GetError glGetError;
+
+        public void CheckErrors() {
+            while (true) {
+                var error = glGetError();
+                if (error == GLenum.GL_NO_ERROR)
+                    break;
+                throw new Exception("glGetError:"+error);
+                }
+        }
+
 
 		/* BEGIN ENABLE/DISABLE FUNCTIONS */
 
@@ -839,6 +865,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		enum DebugSyncState { Async, Sync, Disabled };
 		static DebugSyncState debugSyncState = DebugSyncState.Async;
 		static OpenGLDevice This;
+        static bool XSplit_GL_SwapWindow_WorkaroundFlag;
+        static bool XSplit_GL_SwapWindow_WarnOnce = true;
 		private static void DebugCallback(
 			GLenum source,
 			GLenum type,
@@ -848,18 +876,35 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr message, // const GLchar*
 			IntPtr userParam // const GLvoid*
 		) {
+            bool xsplitSuppression = false;
+		    if (XSplit_GL_SwapWindow_WorkaroundFlag) {
+		        if ((id == 0x502) && (source == GLenum.GL_DEBUG_SOURCE_API_ARB) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
+		            && (severity == GLenum.GL_DEBUG_SEVERITY_HIGH_ARB)) {
+		            //GL_INVALID_OPERATION error generated. Render buffer not bound.
+		            // We get this debug callback on every frame swap when xsplit is hooked into the game, suppress.
+                    if (XSplit_GL_SwapWindow_WarnOnce) {
+                        XSplit_GL_SwapWindow_WarnOnce = false;
+                    }
+                    else
+		                return;
+                    FNALoggerEXT.LogWarn("XSplit GL_SwapWindow GL_INVALID_OPERATION workaround enabled.");
+                    xsplitSuppression = true;
+		        }
+		    }
+
 			string err = (
 				Marshal.PtrToStringAnsi(message) +
 				"\n\tSource: " +
 				source.ToString() +
 				"\n\tType: " +
 				type.ToString() +
-				"\n\tId: " +
+				"\n\tId: 0x" +
 				id.ToString("X") +
 				"\n\tSeverity: " +
 				severity.ToString()
 			);
-			if (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
+
+			if ((!xsplitSuppression) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB))
 			{
 				if (err.Contains("GL_INVALID_OPERATION") && err.Contains(" SAMPLES "))
 					This.MultiSampleFailed = true;
@@ -935,6 +980,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			try
 			{
 				INTERNAL_glGetString = (GetString) GetDelegateFromSDL("glGetString",typeof(GetString));
+                glGetError = (GetError)GetDelegateFromSDL("glGetError", typeof(GetError));
 
                 // Print GL information
                 device =  glGetString(GLenum.GL_RENDERER);
