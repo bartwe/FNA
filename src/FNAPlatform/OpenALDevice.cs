@@ -1339,7 +1339,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			FNALoggerEXT.LogError("OpenAL Error: " + ALEnumToString(err));
 #if VERBOSE_AL_DEBUGGING
-			throw new InvalidOperationException("OpenAL Error! " + AL10.ALEnumToString(err));
+            throw new InvalidOperationException("OpenAL Error! " + ALEnumToString(err));
 #endif
         }
 
