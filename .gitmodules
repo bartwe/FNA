@@ -3,7 +3,7 @@
 	url = git://github.com/flibitijibibo/SDL2-CS.git
 [submodule "lib/OpenAL-CS"]
 	path = lib/OpenAL-CS
-	url = git://github.com/flibitijibibo/OpenAL-CS.git
+	url = git://github.com/bartwe/OpenAL-CS.git
 [submodule "lib/MojoShader-CS"]
 	path = lib/MojoShader-CS
 	url = git://github.com/bartwe/MojoShader-CS.git
