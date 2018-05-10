@@ -47,7 +47,6 @@ namespace Microsoft.Xna.Framework
 			SetWindowTitle =		SDL2_FNAPlatform.SetWindowTitle;
 			RunLoop =			SDL2_FNAPlatform.RunLoop;
 			CreateGLDevice =		SDL2_FNAPlatform.CreateGLDevice;
-			CreateALDevice =		SDL2_FNAPlatform.CreateALDevice;
 			SetPresentationInterval =	SDL2_FNAPlatform.SetPresentationInterval;
 			GetGraphicsAdapters =		SDL2_FNAPlatform.GetGraphicsAdapters;
 			GetCurrentDisplayMode =		SDL2_FNAPlatform.GetCurrentDisplayMode;
@@ -65,7 +64,6 @@ namespace Microsoft.Xna.Framework
 			SetGamePadVibration =		SDL2_FNAPlatform.SetGamePadVibration;
 			GetGamePadGUID =		SDL2_FNAPlatform.GetGamePadGUID;
 			SetGamePadLightBar =		SDL2_FNAPlatform.SetGamePadLightBar;
-			GetBaseDirectory =		SDL2_FNAPlatform.GetBaseDirectory;
 			GetStorageRoot =		SDL2_FNAPlatform.GetStorageRoot;
 			ShowRuntimeError =		SDL2_FNAPlatform.ShowRuntimeError;
 			TextureDataFromStream =		SDL2_FNAPlatform.TextureDataFromStream;
@@ -87,8 +85,14 @@ namespace Microsoft.Xna.Framework
 			}
 
 			AppDomain.CurrentDomain.ProcessExit += SDL2_FNAPlatform.ProgramExit;
-			SDL2_FNAPlatform.ProgramInit();
+			TitleLocation = SDL2_FNAPlatform.ProgramInit();
 		}
+
+		#endregion
+
+		#region Public Static Variables
+
+		public static readonly string TitleLocation;
 
 		#endregion
 
@@ -136,9 +140,6 @@ namespace Microsoft.Xna.Framework
 			GraphicsAdapter adapter
 		);
 		public static readonly CreateGLDeviceFunc CreateGLDevice;
-
-		public delegate IALDevice CreateALDeviceFunc();
-		public static readonly CreateALDeviceFunc CreateALDevice;
 
 		public delegate void SetPresentationIntervalFunc(PresentInterval interval);
 		public static readonly SetPresentationIntervalFunc SetPresentationInterval;
@@ -210,9 +211,6 @@ namespace Microsoft.Xna.Framework
 
 		public delegate void SetGamePadLightBarFunc(int index, Color color);
 		public static readonly SetGamePadLightBarFunc SetGamePadLightBar;
-
-		public delegate string GetBaseDirectoryFunc();
-		public static readonly GetBaseDirectoryFunc GetBaseDirectory;
 
 		public delegate string GetStorageRootFunc();
 		public static readonly GetStorageRootFunc GetStorageRoot;
