@@ -63,6 +63,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
+		bool MultiSampleFailed
+		{
+			get;
+		}
+
 		void Dispose();
 
 		void ResetBackbuffer(

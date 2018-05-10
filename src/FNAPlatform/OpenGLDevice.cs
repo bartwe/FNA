@@ -475,6 +475,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
+		public bool MultiSampleFailed
+		{
+			get;
+			private set;
+		}
 		private bool supportsMultisampling;
 		private bool supportsFauxBackbuffer;
 		private bool supportsBaseVertex;
@@ -561,10 +566,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			PresentationParameters presentationParameters,
 			GraphicsAdapter adapter
 		) {
+			This = this;
 			// Create OpenGL context
 			glContext = SDL.SDL_GL_CreateContext(
 				presentationParameters.DeviceWindowHandle
 			);
+
+			FNALoggerEXT.LogInfo("IGLDevice: OpenGLDevice");
 
 			// Check for a possible ES context
 			int flags;
@@ -581,23 +589,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				presentationParameters.DeviceWindowHandle
 			);
 
-			// Print GL information
-			LoadGLGetString();
-			string renderer = glGetString(GLenum.GL_RENDERER);
-			string version = glGetString(GLenum.GL_VERSION);
-			string vendor = glGetString(GLenum.GL_VENDOR);
-			FNALoggerEXT.LogInfo("IGLDevice: OpenGLDevice");
-			FNALoggerEXT.LogInfo("OpenGL Device: " + renderer);
-			FNALoggerEXT.LogInfo("OpenGL Driver: " + version);
-			FNALoggerEXT.LogInfo("OpenGL Vendor: " + vendor);
-
 			// Initialize entry points
-			LoadGLEntryPoints(string.Format(
-				"Device: {0}\nDriver: {1}\nVendor: {2}",
-				renderer,
-				version,
-				vendor
-			));
+			LoadGLEntryPoints();
 
 			shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
 				GLGetProcAddress,
@@ -964,10 +957,11 @@ namespace Microsoft.Xna.Framework.Graphics
 					glEnable(GLenum.GL_SCISSOR_TEST);
 				}
 
+				XSplit_GL_SwapWindow_WorkaroundFlag = true;
 				SDL.SDL_GL_SwapWindow(
 					overrideWindowHandle
 				);
-
+				XSplit_GL_SwapWindow_WorkaroundFlag = false;
 				BindFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
 			}
 			else
@@ -2201,7 +2195,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			IGLBuffer buffer,
 			int offsetInBytes,
 			IntPtr data,
-			int dataLength,
+			int startIndex,
+			int elementCount,
+			int elementSizeInBytes,
 			SetDataOptions options
 		) {
 #if !DISABLE_THREADING
@@ -2223,8 +2219,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			glBufferSubData(
 				GLenum.GL_ARRAY_BUFFER,
 				(IntPtr) offsetInBytes,
-				(IntPtr) dataLength,
-				data
+				(IntPtr) (elementSizeInBytes * elementCount),
+				data + (startIndex * elementSizeInBytes)
 			);
 
 #if !DISABLE_THREADING
@@ -2236,7 +2232,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			IGLBuffer buffer,
 			int offsetInBytes,
 			IntPtr data,
-			int dataLength,
+			int startIndex,
+			int elementCount,
+			int elementSizeInBytes,
 			SetDataOptions options
 		) {
 #if !DISABLE_THREADING
@@ -2258,8 +2256,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			glBufferSubData(
 				GLenum.GL_ELEMENT_ARRAY_BUFFER,
 				(IntPtr) offsetInBytes,
-				(IntPtr) dataLength,
-				data
+				(IntPtr) (elementSizeInBytes * elementCount),
+				data + (startIndex * elementSizeInBytes)
 			);
 
 #if !DISABLE_THREADING

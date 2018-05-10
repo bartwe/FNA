@@ -681,9 +681,10 @@ namespace Microsoft.Xna.Framework
 						Keys key = ToXNAKey(ref evt.key.keysym);
 						if (keys.Remove(key))
 						{
-							if (textInputBindings.ContainsKey(key))
+							int value;
+							if (textInputBindings.TryGetValue(key, out value))
 							{
-								textInputControlDown[textInputBindings[key]] = false;
+								textInputControlDown[value] = false;
 							}
 							else if ((!keys.Contains(Keys.LeftControl) && textInputControlDown[3]) || key == Keys.V)
 							{

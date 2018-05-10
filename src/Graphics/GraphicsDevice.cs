@@ -72,6 +72,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
+		public bool MultiSampleFailed
+		{
+			get
+			{
+				return GLDevice.MultiSampleFailed;
+			}
+		}
+
 		#endregion
 
 		#region Public Graphics Display Properties

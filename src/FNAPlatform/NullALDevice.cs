@@ -49,10 +49,6 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 		}
 
-		private class NullSource : IALSource
-		{
-		}
-
 		private class NullReverb : IALReverb
 		{
 		}
@@ -142,37 +138,37 @@ namespace Microsoft.Xna.Framework.Audio
 			return null;
 		}
 
-		public IALSource GenSource()
+		public ALSourceHandle GenSource()
 		{
-			return new NullSource();
+			return new ALSourceHandle(uint.MaxValue);
 		}
 
-		public IALSource GenSource(IALBuffer buffer, bool isXACT)
+		public ALSourceHandle GenSource(IALBuffer buffer, bool isXACT)
 		{
-			return new NullSource();
+            return new ALSourceHandle(uint.MaxValue);
 		}
 
-		public void StopAndDisposeSource(IALSource source)
-		{
-			// No-op, duh.
-		}
-
-		public void PlaySource(IALSource source)
+		public void StopAndDisposeSource(ALSourceHandle sourceHandle)
 		{
 			// No-op, duh.
 		}
 
-		public void PauseSource(IALSource source)
+		public void PlaySource(ALSourceHandle sourceHandle)
 		{
 			// No-op, duh.
 		}
 
-		public void ResumeSource(IALSource source)
+		public void PauseSource(ALSourceHandle sourceHandle)
 		{
 			// No-op, duh.
 		}
 
-		public SoundState GetSourceState(IALSource source)
+		public void ResumeSource(ALSourceHandle sourceHandle)
+		{
+			// No-op, duh.
+		}
+
+		public SoundState GetSourceState(ALSourceHandle sourceHandle)
 		{
 			/* FIXME: This return value is highly volatile!
 			 * You can't necessarily do Stopped, because then stuff like Song
@@ -185,71 +181,71 @@ namespace Microsoft.Xna.Framework.Audio
 			return SoundState.Paused;
 		}
 
-		public void SetSourceVolume(IALSource source, float volume)
+		public void SetSourceVolume(ALSourceHandle sourceHandle, float volume)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourceLooped(IALSource source, bool looped)
+		public void SetSourceLooped(ALSourceHandle sourceHandle, bool looped)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourcePan(IALSource source, float pan)
+		public void SetSourcePan(ALSourceHandle sourceHandle, float pan)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourcePosition(IALSource source, Vector3 pos)
+		public void SetSourcePosition(ALSourceHandle sourceHandle, Vector3 pos)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourcePitch(IALSource source, float pitch, bool clamp)
+		public void SetSourcePitch(ALSourceHandle sourceHandle, float pitch, bool clamp)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourceReverb(IALSource source, IALReverb reverb)
+		public void SetSourceReverb(ALSourceHandle sourceHandle, IALReverb reverb)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourceLowPassFilter(IALSource source, float hfGain)
+		public void SetSourceLowPassFilter(ALSourceHandle sourceHandle, float hfGain)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourceHighPassFilter(IALSource source, float lfGain)
+		public void SetSourceHighPassFilter(ALSourceHandle sourceHandle, float lfGain)
 		{
 			// No-op, duh.
 		}
 
-		public void SetSourceBandPassFilter(IALSource source, float hfGain, float lfGain)
+		public void SetSourceBandPassFilter(ALSourceHandle sourceHandle, float hfGain, float lfGain)
 		{
 			// No-op, duh.
 		}
 
-		public void QueueSourceBuffer(IALSource source, IALBuffer buffer)
+		public void QueueSourceBuffer(ALSourceHandle sourceHandle, IALBuffer buffer)
 		{
 			// No-op, duh.
 		}
 
 		public void DequeueSourceBuffers(
-			IALSource source,
+			ALSourceHandle sourceHandle,
 			int buffersToDequeue,
 			Queue<IALBuffer> errorCheck
 		) {
 			// No-op, duh.
 		}
 
-		public int CheckProcessedBuffers(IALSource source)
+		public int CheckProcessedBuffers(ALSourceHandle sourceHandle)
 		{
 			return 0;
 		}
 
 		public void GetBufferData(
-			IALSource source,
+			ALSourceHandle sourceHandle,
 			IALBuffer[] buffer,
 			IntPtr samples,
 			int samplesLen,

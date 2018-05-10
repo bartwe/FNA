@@ -71,24 +71,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region OpenAL Source Container Class
-
-		private class OpenALSource : IALSource
-		{
-			public uint Handle
-			{
-				get;
-				private set;
-			}
-
-			public OpenALSource(uint handle)
-			{
-				Handle = handle;
-			}
-		}
-
-		#endregion
-
 		#region OpenAL Reverb Effect Container Class
 
 		private class OpenALReverb : IALReverb
@@ -244,6 +226,8 @@ namespace Microsoft.Xna.Framework.Audio
 			return new OpenALBuffer(result, TimeSpan.Zero, (int) channels, sampleRate);
 		}
 
+        int[] _loopArgumentsSpare = new int[2];
+
 		public IALBuffer GenBuffer(
 			byte[] data,
 			uint sampleRate,
@@ -337,17 +321,17 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// Set the loop points, if applicable
 			if (loopStart > 0 || loopEnd > 0)
-			{
-				AL10.alBufferiv(
-					result,
-					ALEXT.AL_LOOP_POINTS_SOFT,
-					new int[]
-					{
-						(int) loopStart,
-						(int) loopEnd
-					}
-				);
-			}
+			    unsafe {
+                    _loopArgumentsSpare[0] = (int)loopStart;
+                    _loopArgumentsSpare[1] = (int)loopEnd;
+			        fixed (int* loopArgumentsp = _loopArgumentsSpare) {
+			            AL10.alBufferiv(
+			                result,
+			                ALEXT.AL_LOOP_POINTS_SOFT,
+                            loopArgumentsp
+			                );
+			        }
+			    }
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
@@ -423,43 +407,45 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 
 			byte[] data = new byte[bufLen];
-			byte[] monoData = new byte[bufLen / 2];
-			fixed (byte* dataPtr = &data[0])
-			fixed (byte* monoPtr = &monoData[0])
-			{
-				ALEXT.alGetBufferSamplesSOFT(
-					buf.Handle,
-					0,
-					bufLen / bits / 2,
-					ALEXT.AL_STEREO_SOFT,
-					bits == 2 ? ALEXT.AL_SHORT_SOFT : ALEXT.AL_BYTE_SOFT,
-					(IntPtr) dataPtr
-				);
-#if VERBOSE_AL_DEBUGGING
-				CheckALError();
-#endif
+            byte[] monoData = new byte[bufLen / 2];
+            fixed (void* datap = data) {
+                var dataPtr = (IntPtr)datap;
+			    ALEXT.alGetBufferSamplesSOFT(
+				    buf.Handle,
+				    0,
+				    bufLen / bits / 2,
+				    ALEXT.AL_STEREO_SOFT,
+				    bits == 2 ? ALEXT.AL_SHORT_SOFT : ALEXT.AL_BYTE_SOFT,
+				    dataPtr
+			    );
+    #if VERBOSE_AL_DEBUGGING
+			    CheckALError();
+    #endif
 
-				if (bits == 2)
-				{
-					short* src = (short*) dataPtr;
-					short* dst = (short*) monoPtr;
-					for (int i = 0; i < monoData.Length / 2; i += 1)
-					{
-						dst[i] = (short) (((int) src[0] + (int) src[1]) / 2);
-						src += 2;
-					}
-				}
-				else
-				{
-					sbyte* src = (sbyte*) dataPtr;
-					sbyte* dst = (sbyte*) monoPtr;
-					for (int i = 0; i < monoData.Length; i += 1)
-					{
-						dst[i] = (sbyte) (((short) src[0] + (short) src[1]) / 2);
-						src += 2;
-					}
-				}
-			}
+                fixed (void* monoPtr = monoData) {
+				    if (bits == 2)
+				    {
+					    short* src = (short*) dataPtr;
+					    short* dst = (short*) monoPtr;
+					    for (int i = 0; i < monoData.Length / 2; i += 1)
+					    {
+						    dst[i] = (short) (((int) src[0] + (int) src[1]) / 2);
+						    src += 2;
+					    }
+				    }
+				    else
+				    {
+					    sbyte* src = (sbyte*) dataPtr;
+					    sbyte* dst = (sbyte*) monoPtr;
+					    for (int i = 0; i < monoData.Length; i += 1)
+					    {
+						    dst[i] = (sbyte) (((short) src[0] + (short) src[1]) / 2);
+						    src += 2;
+					    }
+				    }
+			    }
+            }
+			data = null;
 
 			return GenBuffer(
 				monoData,
@@ -476,7 +462,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region OpenAL Source Methods
 
-		public IALSource GenSource()
+		public ALSourceHandle GenSource()
 		{
 			uint result;
 			AL10.alGenSources(1, out result);
@@ -485,17 +471,17 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 			if (result == 0)
 			{
-				return null;
+                return ALSourceHandle.NullHandle;
 			}
 			AL10.alSourcef(
 				result,
 				AL10.AL_REFERENCE_DISTANCE,
 				AudioDevice.DistanceScale
 			);
-			return new OpenALSource(result);
+            return new ALSourceHandle(result);
 		}
 
-		public IALSource GenSource(IALBuffer buffer, bool isXACT)
+		public ALSourceHandle GenSource(IALBuffer buffer, bool isXACT)
 		{
 			uint result;
 			AL10.alGenSources(1, out result);
@@ -504,7 +490,7 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 			if (result == 0)
 			{
-				return null;
+                return ALSourceHandle.NullHandle;
 			}
 			AL10.alSourcei(
 				result,
@@ -527,12 +513,12 @@ namespace Microsoft.Xna.Framework.Audio
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
-			return new OpenALSource(result);
+            return new ALSourceHandle(result);
 		}
 
-		public void StopAndDisposeSource(IALSource source)
+		public void StopAndDisposeSource(ALSourceHandle sourceHandle)
 		{
-			uint handle = (source as OpenALSource).Handle;
+			uint handle = sourceHandle.Handle;
 			AL10.alSourceStop(handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
@@ -543,35 +529,35 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void PlaySource(IALSource source)
+		public void PlaySource(ALSourceHandle sourceHandle)
 		{
-			AL10.alSourcePlay((source as OpenALSource).Handle);
+			AL10.alSourcePlay(sourceHandle.Handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
 		}
 
-		public void PauseSource(IALSource source)
+		public void PauseSource(ALSourceHandle sourceHandle)
 		{
-			AL10.alSourcePause((source as OpenALSource).Handle);
+			AL10.alSourcePause(sourceHandle.Handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
 		}
 
-		public void ResumeSource(IALSource source)
+		public void ResumeSource(ALSourceHandle sourceHandle)
 		{
-			AL10.alSourcePlay((source as OpenALSource).Handle);
+			AL10.alSourcePlay(sourceHandle.Handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
 		}
 
-		public SoundState GetSourceState(IALSource source)
+		public SoundState GetSourceState(ALSourceHandle sourceHandle)
 		{
 			int state;
 			AL10.alGetSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_SOURCE_STATE,
 				out state
 			);
@@ -589,10 +575,10 @@ namespace Microsoft.Xna.Framework.Audio
 			return SoundState.Stopped;
 		}
 
-		public void SetSourceVolume(IALSource source, float volume)
+		public void SetSourceVolume(ALSourceHandle sourceHandle, float volume)
 		{
 			AL10.alSourcef(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_GAIN,
 				volume * SoundEffect.MasterVolume // FIXME: alListener(AL_GAIN) -flibit
 			);
@@ -601,10 +587,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceLooped(IALSource source, bool looped)
+		public void SetSourceLooped(ALSourceHandle sourceHandle, bool looped)
 		{
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_LOOPING,
 				looped ? 1 : 0
 			);
@@ -613,10 +599,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourcePan(IALSource source, float pan)
+		public void SetSourcePan(ALSourceHandle sourceHandle, float pan)
 		{
 			AL10.alSource3f(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_POSITION,
 				pan,
 				0.0f,
@@ -627,10 +613,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourcePosition(IALSource source, Vector3 pos)
+		public void SetSourcePosition(ALSourceHandle sourceHandle, Vector3 pos)
 		{
 			AL10.alSource3f(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_POSITION,
 				pos.X,
 				pos.Y,
@@ -641,7 +627,7 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourcePitch(IALSource source, float pitch, bool clamp)
+		public void SetSourcePitch(ALSourceHandle sourceHandle, float pitch, bool clamp)
 		{
 			/* XNA sets pitch bounds to [-1.0f, 1.0f], each end being one octave.
 			 * OpenAL's AL_PITCH boundaries are (0.0f, INF).
@@ -659,7 +645,7 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new IndexOutOfRangeException("XNA PITCH MUST BE WITHIN [-1.0f, 1.0f]!");
 			}
 			AL10.alSourcef(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_PITCH,
 				(float) Math.Pow(2, pitch)
 			);
@@ -668,10 +654,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceReverb(IALSource source, IALReverb reverb)
+		public void SetSourceReverb(ALSourceHandle sourceHandle, IALReverb reverb)
 		{
 			AL10.alSource3i(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_AUXILIARY_SEND_FILTER,
 				(int) (reverb as OpenALReverb).SlotHandle,
 				0,
@@ -682,12 +668,12 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceLowPassFilter(IALSource source, float hfGain)
+		public void SetSourceLowPassFilter(ALSourceHandle sourceHandle, float hfGain)
 		{
 			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_LOWPASS);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_LOWPASS_GAINHF, hfGain);
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
@@ -696,12 +682,12 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceHighPassFilter(IALSource source, float lfGain)
+		public void SetSourceHighPassFilter(ALSourceHandle sourceHandle, float lfGain)
 		{
 			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_HIGHPASS);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_HIGHPASS_GAINLF, lfGain);
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
@@ -710,13 +696,13 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void SetSourceBandPassFilter(IALSource source, float hfGain, float lfGain)
+		public void SetSourceBandPassFilter(ALSourceHandle sourceHandle, float hfGain, float lfGain)
 		{
 			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_BANDPASS);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_BANDPASS_GAINHF, hfGain);
 			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_BANDPASS_GAINLF, lfGain);
 			AL10.alSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
@@ -725,11 +711,11 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void QueueSourceBuffer(IALSource source, IALBuffer buffer)
+		public void QueueSourceBuffer(ALSourceHandle sourceHandle, IALBuffer buffer)
 		{
 			uint buf = (buffer as OpenALBuffer).Handle;
 			AL10.alSourceQueueBuffers(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				1,
 				ref buf
 			);
@@ -739,13 +725,13 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void DequeueSourceBuffers(
-			IALSource source,
+			ALSourceHandle sourceHandle,
 			int buffersToDequeue,
 			Queue<IALBuffer> errorCheck
 		) {
 			uint[] bufs = new uint[buffersToDequeue];
 			AL10.alSourceUnqueueBuffers(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				buffersToDequeue,
 				bufs
 			);
@@ -765,11 +751,11 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public int CheckProcessedBuffers(IALSource source)
+		public int CheckProcessedBuffers(ALSourceHandle sourceHandle)
 		{
 			int result;
 			AL10.alGetSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL10.AL_BUFFERS_PROCESSED,
 				out result
 			);
@@ -780,7 +766,7 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void GetBufferData(
-			IALSource source,
+			ALSourceHandle sourceHandle,
 			IALBuffer[] buffer,
 			IntPtr samples,
 			int samplesLen,
@@ -792,7 +778,7 @@ namespace Microsoft.Xna.Framework.Audio
 			// Where are we now?
 			int offset;
 			AL10.alGetSourcei(
-				(source as OpenALSource).Handle,
+				sourceHandle.Handle,
 				AL11.AL_SAMPLE_OFFSET,
 				out offset
 			);
@@ -1228,6 +1214,120 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private OpenAL Error Check Methods
 
+        
+	    public static string ALEnumToString(int alEnum) {
+	        switch (alEnum) {
+	                //case AL_NONE: return "AL_NONE"; 
+	                //case AL_FALSE : return ""; 
+	            case AL10.AL_TRUE:
+                    return "AL_TRUE";
+	            case AL10.AL_SOURCE_RELATIVE:
+	                return "AL_SOURCE_RELATIVE";
+	            case AL10.AL_CONE_INNER_ANGLE:
+	                return "AL_CONE_INNER_ANGLE";
+	            case AL10.AL_CONE_OUTER_ANGLE:
+	                return "AL_CONE_OUTER_ANGLE";
+	            case AL10.AL_PITCH:
+	                return "AL_PITCH";
+	            case AL10.AL_POSITION:
+	                return "AL_POSITION";
+	            case AL10.AL_DIRECTION:
+	                return "AL_DIRECTION";
+	            case AL10.AL_VELOCITY:
+	                return "AL_VELOCITY";
+	            case AL10.AL_LOOPING:
+	                return "AL_LOOPING";
+	            case AL10.AL_BUFFER:
+	                return "AL_BUFFER";
+	            case AL10.AL_GAIN:
+	                return "AL_GAIN";
+	            case AL10.AL_MIN_GAIN:
+	                return "AL_MIN_GAIN";
+	            case AL10.AL_MAX_GAIN:
+	                return "AL_MAX_GAIN";
+	            case AL10.AL_ORIENTATION:
+	                return "AL_ORIENTATION";
+	            case AL10.AL_SOURCE_STATE:
+	                return "AL_SOURCE_STATE";
+	            case AL10.AL_INITIAL:
+	                return "AL_INITIAL";
+	            case AL10.AL_PLAYING:
+	                return "AL_PLAYING";
+	            case AL10.AL_PAUSED:
+	                return "AL_PAUSED";
+	            case AL10.AL_STOPPED:
+	                return "AL_STOPPED";
+	            case AL10.AL_BUFFERS_QUEUED:
+	                return "AL_BUFFERS_QUEUED";
+	            case AL10.AL_BUFFERS_PROCESSED:
+	                return "AL_BUFFERS_PROCESSED";
+	            case AL10.AL_REFERENCE_DISTANCE:
+	                return "AL_REFERENCE_DISTANCE";
+	            case AL10.AL_ROLLOFF_FACTOR:
+	                return "AL_ROLLOFF_FACTOR";
+	            case AL10.AL_CONE_OUTER_GAIN:
+	                return "AL_CONE_OUTER_GAIN";
+	            case AL10.AL_MAX_DISTANCE:
+	                return "AL_MAX_DISTANCE";
+	            case AL10.AL_SOURCE_TYPE:
+	                return "AL_SOURCE_TYPE";
+	            case AL10.AL_STATIC:
+	                return "AL_STATIC";
+	            case AL10.AL_STREAMING:
+	                return "AL_STREAMING";
+	            case AL10.AL_UNDETERMINED:
+	                return "AL_UNDETERMINED";
+	            case AL10.AL_FORMAT_MONO8:
+	                return "AL_FORMAT_MONO8";
+	            case AL10.AL_FORMAT_MONO16:
+	                return "AL_FORMAT_MONO16";
+	            case AL10.AL_FORMAT_STEREO8:
+	                return "AL_FORMAT_STEREO8";
+	            case AL10.AL_FORMAT_STEREO16:
+	                return "AL_FORMAT_STEREO16";
+	            case AL10.AL_FREQUENCY:
+	                return "AL_FREQUENCY";
+	            case AL10.AL_BITS:
+	                return "AL_BITS";
+	            case AL10.AL_CHANNELS:
+	                return "AL_CHANNELS";
+	            case AL10.AL_SIZE:
+	                return "AL_SIZE";
+	            case AL10.AL_NO_ERROR:
+	                return "AL_NO_ERROR";
+	            case AL10.AL_INVALID_NAME:
+	                return "AL_INVALID_NAME";
+	            case AL10.AL_INVALID_ENUM:
+	                return "AL_INVALID_ENUM";
+	            case AL10.AL_INVALID_VALUE:
+	                return "AL_INVALID_VALUE";
+	            case AL10.AL_INVALID_OPERATION:
+	                return "AL_INVALID_OPERATION";
+	            case AL10.AL_OUT_OF_MEMORY:
+	                return "AL_OUT_OF_MEMORY";
+	            case AL10.AL_VENDOR:
+	                return "AL_VENDOR";
+	            case AL10.AL_VERSION:
+	                return "AL_VERSION";
+	            case AL10.AL_RENDERER:
+	                return "AL_RENDERER";
+	            case AL10.AL_EXTENSIONS:
+	                return "AL_EXTENSIONS";
+	            case AL10.AL_DOPPLER_FACTOR:
+	                return "AL_DOPPLER_FACTOR";
+	            case AL10.AL_DOPPLER_VELOCITY:
+	                return "AL_DOPPLER_VELOCITY";
+	            case AL10.AL_DISTANCE_MODEL:
+	                return "AL_DISTANCE_MODEL";
+	            case AL10.AL_INVERSE_DISTANCE:
+	                return "AL_INVERSE_DISTANCE";
+	            case AL10.AL_INVERSE_DISTANCE_CLAMPED:
+	                return "AL_INVERSE_DISTANCE_CLAMPED";
+                default:
+                    return "ALEnum: "+ alEnum.ToString("X4");
+	        }
+        }
+
 		private void CheckALError()
 		{
 			int err = AL10.alGetError();
@@ -1237,12 +1337,50 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 			}
 
-			FNALoggerEXT.LogError("OpenAL Error: " + err.ToString("X4"));
+			FNALoggerEXT.LogError("OpenAL Error: " + ALEnumToString(err));
 #if VERBOSE_AL_DEBUGGING
-			throw new InvalidOperationException("OpenAL Error!");
+            throw new InvalidOperationException("OpenAL Error! " + ALEnumToString(err));
 #endif
-		}
+        }
 
+        public static string ALCEnumToString(int alcEnum) {
+            switch (alcEnum) {
+                //case ALC_FALSE:
+                //    return "ALC_FALSE";
+                case ALC10.ALC_TRUE:
+                    return "ALC_TRUE";
+                case ALC10.ALC_FREQUENCY:
+                    return "ALC_FREQUENCY";
+                case ALC10.ALC_REFRESH:
+                    return "ALC_REFRESH";
+                case ALC10.ALC_SYNC:
+                    return "ALC_SYNC";
+                case ALC10.ALC_NO_ERROR:
+                    return "ALC_NO_ERROR";
+                case ALC10.ALC_INVALID_DEVICE:
+                    return "ALC_INVALID_DEVICE";
+                case ALC10.ALC_INVALID_CONTEXT:
+                    return "ALC_INVALID_CONTEXT";
+                case ALC10.ALC_INVALID_ENUM:
+                    return "ALC_INVALID_ENUM";
+                case ALC10.ALC_INVALID_VALUE:
+                    return "ALC_INVALID_VALUE";
+                case ALC10.ALC_OUT_OF_MEMORY:
+                    return "ALC_OUT_OF_MEMORY";
+                case ALC10.ALC_ATTRIBUTES_SIZE:
+                    return "ALC_ATTRIBUTES_SIZE";
+                case ALC10.ALC_ALL_ATTRIBUTES:
+                    return "ALC_ALL_ATTRIBUTES";
+                case ALC10.ALC_DEFAULT_DEVICE_SPECIFIER:
+                    return "ALC_DEFAULT_DEVICE_SPECIFIER";
+                case ALC10.ALC_DEVICE_SPECIFIER:
+                    return "ALC_DEVICE_SPECIFIER";
+                case ALC10.ALC_EXTENSIONS:
+                    return "ALC_EXTENSIONS";
+                default:
+                    return "ALCEnum: " + alcEnum.ToString("X4");
+            }
+        }
 		private bool CheckALCError()
 		{
 			int err = ALC10.alcGetError(alDevice);
@@ -1252,7 +1390,7 @@ namespace Microsoft.Xna.Framework.Audio
 				return false;
 			}
 
-			FNALoggerEXT.LogError("OpenAL Device Error: " + err.ToString("X4"));
+            FNALoggerEXT.LogError("OpenAL Device Error: " + ALCEnumToString(err));
 			return true;
 		}
 

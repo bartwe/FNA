@@ -578,15 +578,15 @@ namespace Microsoft.Xna.Framework.Audio
 			return INTERNAL_waveBanks[name].INTERNAL_getTrack(track);
 		}
 
-		internal void INTERNAL_dropWaveBankTrack(string name, ushort track)
-		{
-			if (INTERNAL_waveBanks.ContainsKey(name)) // AKA !WaveBank.IsDisposed
+		internal void INTERNAL_dropWaveBankTrack(string name, ushort track) {
+		    WaveBank value;
+		    if (INTERNAL_waveBanks.TryGetValue(name, out value)) // AKA !WaveBank.IsDisposed
 			{
-				INTERNAL_waveBanks[name].INTERNAL_dropTrack(track);
+				value.INTERNAL_dropTrack(track);
 			}
 		}
 
-		internal string INTERNAL_getVariableName(ushort index)
+	    internal string INTERNAL_getVariableName(ushort index)
 		{
 			return INTERNAL_variables[index].Name;
 		}
