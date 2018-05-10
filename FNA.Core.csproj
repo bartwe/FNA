@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
 		<Platforms>x64</Platforms>
 	</PropertyGroup>
 	<PropertyGroup>
@@ -9,7 +9,6 @@
 		<RootNamespace>Microsoft.Xna.Framework</RootNamespace>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<BaseIntermediateOutputPath>obj_core\</BaseIntermediateOutputPath>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Include="src\Audio\AudioCategory.cs" />

@@ -47,11 +47,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			Size = size;
 			LevelCount = mipMap ? CalculateMipLevels(size) : 1;
 
-			// Hey, guess what? You can't render to a compressed texture!
+			// TODO: Use QueryRenderTargetFormat!
 			if (	this is IRenderTarget &&
-				(	format == SurfaceFormat.Dxt1 ||
-					format == SurfaceFormat.Dxt3 ||
-					format == SurfaceFormat.Dxt5	)	)
+				format != SurfaceFormat.Color &&
+				format != SurfaceFormat.Rgba1010102 &&
+				format != SurfaceFormat.Rg32 &&
+				format != SurfaceFormat.Rgba64 &&
+				format != SurfaceFormat.Single &&
+				format != SurfaceFormat.Vector2 &&
+				format != SurfaceFormat.Vector4 &&
+				format != SurfaceFormat.HalfSingle &&
+				format != SurfaceFormat.HalfVector2 &&
+				format != SurfaceFormat.HalfVector4 &&
+				format != SurfaceFormat.HdrBlendable	)
 			{
 				Format = SurfaceFormat.Color;
 			}

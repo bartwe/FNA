@@ -486,7 +486,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private delegate void CreateSamplers(
 			int n,
-			uint[] samplers
+			IntPtr samplers
 		);
 		private CreateSamplers glCreateSamplers;
 
@@ -638,7 +638,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private delegate void NamedFramebufferDrawBuffers(
 			uint framebuffer,
 			int n,
-			GLenum[] bufs
+			IntPtr bufs
 		);
 		private NamedFramebufferDrawBuffers glNamedFramebufferDrawBuffers;
 
@@ -807,7 +807,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
 
 		private delegate void DebugMessageCallback(
-			DebugProc callback,
+			IntPtr debugCallback,
 			IntPtr userParam
 		);
 		private DebugMessageCallback glDebugMessageCallbackARB;
@@ -865,7 +865,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN STRING MARKER FUNCTIONS */
 
-		private delegate void StringMarkerGREMEDY(int length, byte[] chars);
+		private delegate void StringMarkerGREMEDY(int length, IntPtr chars);
 		private StringMarkerGREMEDY glStringMarkerGREMEDY;
 
 		/* END STRING MARKER FUNCTIONS */
@@ -1253,7 +1253,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					IntPtr.Zero,
 					false
 				);
-				glDebugMessageCallbackARB(DebugCall, IntPtr.Zero);
+				glDebugMessageCallbackARB(Marshal.GetFunctionPointerForDelegate(DebugCall), IntPtr.Zero);
 			}
 
 			/* GREMEDY_string_marker, for apitrace */

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+
 using SDL2;
 #endregion
 
@@ -218,18 +219,18 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB = 0x8242,
 
 
-		    GL_NO_ERROR = 0,
-		    GL_INVALID_ENUM = 0x0500,
-		    GL_INVALID_VALUE = 0x0501,
-		    GL_INVALID_OPERATION = 0x0502,
+			GL_NO_ERROR = 0,
+			GL_INVALID_ENUM = 0x0500,
+			GL_INVALID_VALUE = 0x0501,
+			GL_INVALID_OPERATION = 0x0502,
 
-		    GL_STACK_OVERFLOW = 0x0503,
-		    GL_STACK_UNDERFLOW = 0x0504,
-		    GL_OUT_OF_MEMORY = 0x0505,
-		    GL_INVALID_FRAMEBUFFER_OPERATION = 0x0506,
-		    GL_CONTEXT_LOST = 0x0507,
-		    GL_TABLE_TOO_LARGE = 0x8031
-    }
+			GL_STACK_OVERFLOW = 0x0503,
+			GL_STACK_UNDERFLOW = 0x0504,
+			GL_OUT_OF_MEMORY = 0x0505,
+			GL_INVALID_FRAMEBUFFER_OPERATION = 0x0506,
+			GL_CONTEXT_LOST = 0x0507,
+			GL_TABLE_TOO_LARGE = 0x8031
+		}
 
 		// Entry Points
 
@@ -598,7 +599,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN FRAMEBUFFER FUNCTIONS */
 
-		private delegate void DrawBuffers(int n, GLenum[] bufs);
+		private delegate void DrawBuffers(int n, IntPtr bufs);
 		private DrawBuffers glDrawBuffers;
 
 		private delegate void ReadPixels(
@@ -836,7 +837,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
 
 		private delegate void DebugMessageCallback(
-			DebugProc callback,
+			IntPtr debugCallback,
 			IntPtr userParam
 		);
 		private DebugMessageCallback glDebugMessageCallbackARB;
@@ -938,7 +939,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN STRING MARKER FUNCTIONS */
 
-		private delegate void StringMarkerGREMEDY(int length, byte[] chars);
+		private delegate void StringMarkerGREMEDY(int length, IntPtr chars);
 		private StringMarkerGREMEDY glStringMarkerGREMEDY;
 
 		/* END STRING MARKER FUNCTIONS */
@@ -1513,7 +1514,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					IntPtr.Zero,
 					false
 				);
-				glDebugMessageCallbackARB(DebugCall, IntPtr.Zero);
+				glDebugMessageCallbackARB(Marshal.GetFunctionPointerForDelegate(DebugCall), IntPtr.Zero);
 			}
 
 			/* GREMEDY_string_marker, for apitrace */
