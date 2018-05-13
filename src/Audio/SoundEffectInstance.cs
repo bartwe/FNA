@@ -220,7 +220,7 @@ namespace Microsoft.Xna.Framework.Audio
 				ref listener.listenerData,
 				ref emitter.emitterData,
 				0,
-				out dev.DSPSettings
+				ref dev.DSPSettings
 			);
 			if (handle != IntPtr.Zero)
 			{
