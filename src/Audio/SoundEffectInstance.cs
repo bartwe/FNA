@@ -160,7 +160,7 @@ namespace Microsoft.Xna.Framework.Audio
 			hasStarted = false;
 			is3D = false;
 			matrixCoefficients = Marshal.AllocHGlobal(
-				4 *
+				sizeof(float) *
 				2 * /* FIXME: Could make this 1 for mono */
 				SoundEffect.Device().DeviceDetails.OutputFormat.Format.nChannels
 			);
@@ -214,12 +214,14 @@ namespace Microsoft.Xna.Framework.Audio
 			is3D = true;
 			SoundEffect.FAudioContext dev = SoundEffect.Device();
 			emitter.emitterData.CurveDistanceScaler = dev.CurveDistanceScaler;
+            dev.DSPSettings.SrcChannelCount = isDynamic ?(this as DynamicSoundEffectInstance).format.nChannels :parentEffect.format.nChannels;
+            dev.DSPSettings.DstChannelCount = dev.DeviceDetails.OutputFormat.Format.nChannels;
 			dev.DSPSettings.pMatrixCoefficients = matrixCoefficients;
 			FAudio.F3DAudioCalculate(
 				dev.Handle3D,
 				ref listener.listenerData,
 				ref emitter.emitterData,
-				0,
+                FAudio.F3DAUDIO_CALCULATE_MATRIX,
 				ref dev.DSPSettings
 			);
 			if (handle != IntPtr.Zero)
@@ -227,10 +229,8 @@ namespace Microsoft.Xna.Framework.Audio
 				FAudio.FAudioVoice_SetOutputMatrix(
 					handle,
 					IntPtr.Zero,
-					isDynamic ?
-						(this as DynamicSoundEffectInstance).format.nChannels :
-						parentEffect.format.nChannels,
-					dev.DeviceDetails.OutputFormat.Format.nChannels,
+                    dev.DSPSettings.SrcChannelCount,
+                    dev.DSPSettings.DstChannelCount,
 					matrixCoefficients,
 					0
 				);
@@ -291,10 +291,8 @@ namespace Microsoft.Xna.Framework.Audio
 				FAudio.FAudioVoice_SetOutputMatrix(
 					handle,
 					IntPtr.Zero,
-					isDynamic ?
-						(this as DynamicSoundEffectInstance).format.nChannels :
-						parentEffect.format.nChannels,
-					dev.DeviceDetails.OutputFormat.Format.nChannels,
+                    dev.DSPSettings.SrcChannelCount,
+                    dev.DSPSettings.DstChannelCount,
 					matrixCoefficients,
 					0
 				);
