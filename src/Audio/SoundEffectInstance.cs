@@ -214,8 +214,6 @@ namespace Microsoft.Xna.Framework.Audio
 			is3D = true;
 			SoundEffect.FAudioContext dev = SoundEffect.Device();
 			emitter.emitterData.CurveDistanceScaler = dev.CurveDistanceScaler;
-            dev.DSPSettings.SrcChannelCount = isDynamic ?(this as DynamicSoundEffectInstance).format.nChannels :parentEffect.format.nChannels;
-            dev.DSPSettings.DstChannelCount = dev.DeviceDetails.OutputFormat.Format.nChannels;
 			dev.DSPSettings.pMatrixCoefficients = matrixCoefficients;
 			dev.DSPSettings.SrcChannelCount = isDynamic ?
 				(this as DynamicSoundEffectInstance).format.nChannels :
