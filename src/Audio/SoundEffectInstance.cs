@@ -217,6 +217,9 @@ namespace Microsoft.Xna.Framework.Audio
             dev.DSPSettings.SrcChannelCount = isDynamic ?(this as DynamicSoundEffectInstance).format.nChannels :parentEffect.format.nChannels;
             dev.DSPSettings.DstChannelCount = dev.DeviceDetails.OutputFormat.Format.nChannels;
 			dev.DSPSettings.pMatrixCoefficients = matrixCoefficients;
+			dev.DSPSettings.SrcChannelCount = isDynamic ?
+				(this as DynamicSoundEffectInstance).format.nChannels :
+				parentEffect.format.nChannels;
 			FAudio.F3DAudioCalculate(
 				dev.Handle3D,
 				ref listener.listenerData,
@@ -229,8 +232,8 @@ namespace Microsoft.Xna.Framework.Audio
 				FAudio.FAudioVoice_SetOutputMatrix(
 					handle,
 					IntPtr.Zero,
-                    dev.DSPSettings.SrcChannelCount,
-                    dev.DSPSettings.DstChannelCount,
+					dev.DSPSettings.SrcChannelCount,
+					dev.DSPSettings.DstChannelCount,
 					matrixCoefficients,
 					0
 				);
@@ -268,7 +271,7 @@ namespace Microsoft.Xna.Framework.Audio
 				dev.Handle,
 				out handle,
 				ref fmt,
-				0,
+				FAudio.FAUDIO_VOICE_USEFILTER,
 				FAudio.FAUDIO_DEFAULT_FREQ_RATIO,
 				callbacks,
 				IntPtr.Zero,
@@ -309,7 +312,18 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			else
 			{
-				parentEffect.handle.LoopCount = (uint) (IsLooped ? 255 : 0);
+				if (IsLooped)
+				{
+					parentEffect.handle.LoopCount = 255;
+					parentEffect.handle.LoopBegin = parentEffect.loopStart;
+					parentEffect.handle.LoopLength = parentEffect.loopLength;
+				}
+				else
+				{
+					parentEffect.handle.LoopCount = 0;
+					parentEffect.handle.LoopBegin = 0;
+					parentEffect.handle.LoopLength = 0;
+				}
 				FAudio.FAudioSourceVoice_SubmitSourceBuffer(
 					handle,
 					ref parentEffect.handle,
