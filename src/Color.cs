@@ -15,10 +15,13 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using Microsoft.Xna.Framework.Design;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -42,12 +45,12 @@ namespace Microsoft.Xna.Framework
 			{
 				unchecked
 				{
-					return (byte) (this.packedValue >> 16);
+					return (byte) (this.PackedValue >> 16);
 				}
 			}
 			set
 			{
-				this.packedValue = (this.packedValue & 0xff00ffff) | ((uint) value << 16);
+				this.PackedValue = (this.PackedValue & 0xff00ffff) | ((uint) value << 16);
 			}
 		}
 
@@ -60,12 +63,12 @@ namespace Microsoft.Xna.Framework
 			{
 				unchecked
 				{
-					return (byte) (this.packedValue >> 8);
+					return (byte) (this.PackedValue >> 8);
 				}
 			}
 			set
 			{
-				this.packedValue = (this.packedValue & 0xffff00ff) | ((uint) value << 8);
+				this.PackedValue = (this.PackedValue & 0xffff00ff) | ((uint) value << 8);
 			}
 		}
 
@@ -78,12 +81,12 @@ namespace Microsoft.Xna.Framework
 			{
 				unchecked
 				{
-					return (byte) (this.packedValue);
+					return (byte) (this.PackedValue);
 				}
 			}
 			set
 			{
-				this.packedValue = (this.packedValue & 0xffffff00) | value;
+				this.PackedValue = (this.PackedValue & 0xffffff00) | value;
 			}
 		}
 
@@ -92,16 +95,20 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		public byte A
 		{
+            [TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				unchecked
 				{
-					return (byte) (this.packedValue >> 24);
+					return (byte) (this.PackedValue >> 24);
 				}
 			}
+            [TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				this.packedValue = (this.packedValue & 0x00ffffff) | ((uint) value << 24);
+				this.PackedValue = (this.PackedValue & 0x00ffffff) | ((uint) value << 24);
 			}
 		}
 
@@ -109,15 +116,15 @@ namespace Microsoft.Xna.Framework
 		/// Gets or sets packed value of this <see cref="Color"/>.
 		/// </summary>
 		[CLSCompliant(false)]
-		public UInt32 PackedValue
+		UInt32 IPackedVector<uint>.PackedValue
 		{
 			get
 			{
-				return packedValue;
+				return PackedValue;
 			}
 			set
 			{
-				packedValue = value;
+				PackedValue = value;
 			}
 		}
 
@@ -1413,8 +1420,10 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Variables
 
+
+        //bartwe: hacks
 		// ARGB. Keep this name as it is used by XNA games in reflection!
-		private uint packedValue;
+		public uint PackedValue;
 
 		#endregion
 
@@ -1575,7 +1584,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="color">A <see cref="Vector4"/> representing a color.</param>
 		public Color(Vector4 color)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 
 			R = (byte) MathHelper.Clamp(color.X * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(color.Y * 255, Byte.MinValue, Byte.MaxValue);
@@ -1589,7 +1598,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="color">A <see cref="Vector3"/> representing a color.</param>
 		public Color(Vector3 color)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 
 			R = (byte) MathHelper.Clamp(color.X * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(color.Y * 255, Byte.MinValue, Byte.MaxValue);
@@ -1606,7 +1615,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="alpha">The alpha component value from 0 to 255.</param>
 		public Color(Color color, int alpha)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 
 			R = color.R;
 			G = color.G;
@@ -1623,7 +1632,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
 		public Color(Color color, float alpha)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 
 			R = color.R;
 			G = color.G;
@@ -1639,7 +1648,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="b">Blue component value from 0.0f to 1.0f.</param>
 		public Color(float r, float g, float b)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 
 			R = (byte) MathHelper.Clamp(r * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g * 255, Byte.MinValue, Byte.MaxValue);
@@ -1655,7 +1664,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="b">Blue component value from 0 to 255.</param>
 		public Color(int r, int g, int b)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 			R = (byte) MathHelper.Clamp(r, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(b, Byte.MinValue, Byte.MaxValue);
@@ -1671,7 +1680,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="alpha">Alpha component value from 0 to 255.</param>
 		public Color(int r, int g, int b, int alpha)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 			R = (byte) MathHelper.Clamp(r, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(b, Byte.MinValue, Byte.MaxValue);
@@ -1687,7 +1696,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
 		public Color(float r, float g, float b, float alpha)
 		{
-			packedValue = 0;
+			PackedValue = 0;
 
 			R = (byte) MathHelper.Clamp(r * 255, Byte.MinValue, Byte.MaxValue);
 			G = (byte) MathHelper.Clamp(g * 255, Byte.MinValue, Byte.MaxValue);
@@ -1699,9 +1708,9 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Constructors
 
-		private Color(uint packedValue)
+		private Color(uint PackedValue)
 		{
-			this.packedValue = packedValue;
+			this.PackedValue = PackedValue;
 		}
 
 		#endregion
@@ -1834,7 +1843,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>Hash code of this <see cref="Color"/>.</returns>
 		public override int GetHashCode()
 		{
-			return this.packedValue.GetHashCode();
+			return this.PackedValue.GetHashCode();
 		}
 
 		/// <summary>
