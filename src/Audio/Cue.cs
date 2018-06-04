@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Runtime.InteropServices;
 #endregion
 
 namespace Microsoft.Xna.Framework.Audio
@@ -123,6 +124,7 @@ namespace Microsoft.Xna.Framework.Audio
 			handle = cue;
 			Name = name;
 			bank = soundBank;
+
 			selfReference = new WeakReference(this);
 			bank.engine.RegisterCue(handle, selfReference);
 		}
@@ -161,16 +163,15 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new ArgumentNullException("emitter");
 			}
 
-			FAudio.F3DAUDIO_DSP_SETTINGS settings = new FAudio.F3DAUDIO_DSP_SETTINGS();
-			settings.SrcChannelCount = 1;
-			settings.DstChannelCount = bank.engine.channels;
+			emitter.emitterData.ChannelCount = bank.dspSettings.SrcChannelCount;
+			emitter.emitterData.CurveDistanceScaler = float.MaxValue;
 			FAudio.FACT3DCalculate(
 				bank.engine.handle3D,
 				ref listener.listenerData,
 				ref emitter.emitterData,
-				ref settings
+				ref bank.dspSettings
 			);
-			FAudio.FACT3DApply(ref settings, handle);
+			FAudio.FACT3DApply(ref bank.dspSettings, handle);
 		}
 
 		public float GetVariable(string name)

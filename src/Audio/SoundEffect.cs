@@ -89,7 +89,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			get
 			{
-				return Device().DSPSettings.DopplerFactor;
+				return Device().DopplerScale;
 			}
 			set
 			{
@@ -97,7 +97,7 @@ namespace Microsoft.Xna.Framework.Audio
 				{
 					throw new ArgumentOutOfRangeException("value <= 0.0f");
 				}
-				Device().DSPSettings.DopplerFactor = value;
+				Device().DopplerScale = value;
 			}
 		}
 
@@ -444,8 +444,8 @@ namespace Microsoft.Xna.Framework.Audio
 			public readonly IntPtr MasterVoice;
 			public readonly FAudio.FAudioDeviceDetails DeviceDetails;
 
-			public FAudio.F3DAUDIO_DSP_SETTINGS DSPSettings;
 			public float CurveDistanceScaler;
+			public float DopplerScale;
 			public float SpeedOfSound;
 
 			private FAudioContext(IntPtr ctx, uint devices)
@@ -478,16 +478,14 @@ namespace Microsoft.Xna.Framework.Audio
 					Handle,
 					out MasterVoice,
 					FAudio.FAUDIO_DEFAULT_CHANNELS,
-					48000, /* Should be 0, but SDL... */
+					FAudio.FAUDIO_DEFAULT_SAMPLERATE,
 					0,
 					i,
 					IntPtr.Zero
 				);
 
-				DSPSettings = new FAudio.F3DAUDIO_DSP_SETTINGS();
-				DSPSettings.DopplerFactor = 1.0f;
-				DSPSettings.DstChannelCount = DeviceDetails.OutputFormat.Format.nChannels;
 				CurveDistanceScaler = 1.0f;
+				DopplerScale = 1.0f;
 				SpeedOfSound = 343.5f;
 				Handle3D = new byte[FAudio.F3DAUDIO_HANDLE_BYTESIZE];
 				FAudio.F3DAudioInitialize(
