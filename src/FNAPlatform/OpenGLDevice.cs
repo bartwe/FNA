@@ -128,47 +128,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region OpenGL Buffer Container Class
-
-		private class OpenGLBuffer : IGLBuffer
-		{
-			public uint Handle
-			{
-				get;
-				private set;
-			}
-
-			public IntPtr BufferSize
-			{
-				get;
-				private set;
-			}
-
-			public GLenum Dynamic
-			{
-				get;
-				private set;
-			}
-
-			public OpenGLBuffer(
-				uint handle,
-				IntPtr bufferSize,
-				GLenum dynamic
-			) {
-				Handle = handle;
-				BufferSize = bufferSize;
-				Dynamic = dynamic;
-			}
-
-			private OpenGLBuffer()
-			{
-				Handle = 0;
-			}
-			public static readonly OpenGLBuffer NullBuffer = new OpenGLBuffer();
-		}
-
-		#endregion
-
 		#region OpenGL Effect Container Class
 
 		private class OpenGLEffect : IGLEffect
@@ -537,8 +496,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private ConcurrentQueue<IGLTexture> GCTextures = new ConcurrentQueue<IGLTexture>();
 		private ConcurrentQueue<IGLRenderbuffer> GCDepthBuffers = new ConcurrentQueue<IGLRenderbuffer>();
-		private ConcurrentQueue<IGLBuffer> GCVertexBuffers = new ConcurrentQueue<IGLBuffer>();
-		private ConcurrentQueue<IGLBuffer> GCIndexBuffers = new ConcurrentQueue<IGLBuffer>();
+		private ConcurrentQueue<GLBuffer> GCVertexBuffers = new ConcurrentQueue<GLBuffer>();
+		private ConcurrentQueue<GLBuffer> GCIndexBuffers = new ConcurrentQueue<GLBuffer>();
 		private ConcurrentQueue<IGLEffect> GCEffects = new ConcurrentQueue<IGLEffect>();
 		private ConcurrentQueue<IGLQuery> GCQueries = new ConcurrentQueue<IGLQuery>();
 
@@ -985,7 +944,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				DeleteRenderbuffer(gcDepthBuffer);
 			}
-			IGLBuffer gcBuffer;
+			GLBuffer gcBuffer;
 			while (GCVertexBuffers.TryDequeue(out gcBuffer))
 			{
 				DeleteVertexBuffer(gcBuffer);
@@ -1034,7 +993,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		public void AddDisposeVertexBuffer(IGLBuffer buffer)
+		public void AddDisposeVertexBuffer(GLBuffer buffer)
 		{
 			if (IsOnMainThread())
 			{
@@ -1046,7 +1005,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		public void AddDisposeIndexBuffer(IGLBuffer buffer)
+		public void AddDisposeIndexBuffer(GLBuffer buffer)
 		{
 			if (IsOnMainThread())
 			{
@@ -1173,7 +1132,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int primitiveCount
 		) {
 			// Unbind current index buffer.
-			BindIndexBuffer(OpenGLBuffer.NullBuffer);
+			BindIndexBuffer(GLBuffer.NullBuffer);
 
 			// Draw!
 			glDrawRangeElements(
@@ -1930,11 +1889,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				 */
 				for (int i = numBindings - 1; i >= 0; i -= 1)
 				{
-					BindVertexBuffer(bindings[i].VertexBuffer.buffer);
-					VertexDeclaration vertexDeclaration = bindings[i].VertexBuffer.VertexDeclaration;
+                    var binding = bindings[i];
+                    BindVertexBuffer(binding.VertexBuffer.buffer);
+                    VertexDeclaration vertexDeclaration = binding.VertexBuffer.VertexDeclaration;
 					IntPtr basePtr = (IntPtr) (
 						vertexDeclaration.VertexStride *
-						(bindings[i].VertexOffset + baseVertex)
+                        (binding.VertexOffset + baseVertex)
 					);
 					foreach (VertexElement element in vertexDeclaration.elements)
 					{
@@ -1949,9 +1909,8 @@ namespace Microsoft.Xna.Framework.Graphics
 						}
 						attributeEnabled[attribLoc] = true;
 						VertexAttribute attr = attributes[attribLoc];
-						uint buffer = (bindings[i].VertexBuffer.buffer as OpenGLBuffer).Handle;
+                        uint buffer = (binding.VertexBuffer.buffer).Handle;
 						IntPtr ptr = basePtr + element.Offset;
-						VertexElementFormat format = element.VertexElementFormat;
 						bool normalized = XNAToGL.VertexAttribNormalized(element);
 						if (	attr.CurrentBuffer != buffer ||
 							attr.CurrentPointer != ptr ||
@@ -1959,7 +1918,8 @@ namespace Microsoft.Xna.Framework.Graphics
 							attr.CurrentNormalized != normalized ||
 							attr.CurrentStride != vertexDeclaration.VertexStride	)
 						{
-							glVertexAttribPointer(
+                            VertexElementFormat format = element.VertexElementFormat;
+                            glVertexAttribPointer(
 								attribLoc,
 								XNAToGL.VertexAttribSize[(int) format],
 								XNAToGL.VertexAttribType[(int) format],
@@ -1975,7 +1935,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						}
 						if (SupportsHardwareInstancing)
 						{
-							attributeDivisor[attribLoc] = bindings[i].InstanceFrequency;
+                            attributeDivisor[attribLoc] = binding.InstanceFrequency;
 						}
 					}
 				}
@@ -1999,7 +1959,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr ptr,
 			int vertexOffset
 		) {
-			BindVertexBuffer(OpenGLBuffer.NullBuffer);
+			BindVertexBuffer(GLBuffer.NullBuffer);
 			IntPtr basePtr = ptr + (vertexDeclaration.VertexStride * vertexOffset);
 
 			if (	vertexDeclaration != ldVertexDeclaration ||
@@ -2093,12 +2053,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region glGenBuffers Methods
 
-		public IGLBuffer GenVertexBuffer(
+		public GLBuffer GenVertexBuffer(
 			bool dynamic,
 			int vertexCount,
 			int vertexStride
 		) {
-			OpenGLBuffer result = null;
+			GLBuffer result = null;
 
 #if !DISABLE_THREADING
 			ForceToMainThread(() => {
@@ -2107,7 +2067,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			uint handle;
 			glGenBuffers(1, out handle);
 
-			result = new OpenGLBuffer(
+			result = new GLBuffer(
 				handle,
 				(IntPtr) (vertexStride * vertexCount),
 				dynamic ? GLenum.GL_STREAM_DRAW : GLenum.GL_STATIC_DRAW
@@ -2128,12 +2088,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			return result;
 		}
 
-		public IGLBuffer GenIndexBuffer(
+		public GLBuffer GenIndexBuffer(
 			bool dynamic,
 			int indexCount,
 			IndexElementSize indexElementSize
 		) {
-			OpenGLBuffer result = null;
+			GLBuffer result = null;
 
 #if !DISABLE_THREADING
 			ForceToMainThread(() => {
@@ -2142,7 +2102,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			uint handle;
 			glGenBuffers(1, out handle);
 
-			result = new OpenGLBuffer(
+			result = new GLBuffer(
 				handle,
 				(IntPtr) (indexCount * XNAToGL.IndexSize[(int) indexElementSize]),
 				dynamic ? GLenum.GL_STREAM_DRAW : GLenum.GL_STATIC_DRAW
@@ -2167,9 +2127,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region glBindBuffer Methods
 
-		private void BindVertexBuffer(IGLBuffer buffer)
+		private void BindVertexBuffer(GLBuffer buffer)
 		{
-			uint handle = (buffer as OpenGLBuffer).Handle;
+			uint handle = (buffer).Handle;
 			if (handle != currentVertexBuffer)
 			{
 				glBindBuffer(GLenum.GL_ARRAY_BUFFER, handle);
@@ -2177,9 +2137,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		private void BindIndexBuffer(IGLBuffer buffer)
+		private void BindIndexBuffer(GLBuffer buffer)
 		{
-			uint handle = (buffer as OpenGLBuffer).Handle;
+			uint handle = (buffer).Handle;
 			if (handle != currentIndexBuffer)
 			{
 				glBindBuffer(GLenum.GL_ELEMENT_ARRAY_BUFFER, handle);
@@ -2192,7 +2152,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region glSetBufferData Methods
 
 		public void SetVertexBufferData(
-			IGLBuffer buffer,
+			GLBuffer buffer,
 			int offsetInBytes,
 			IntPtr data,
 			int dataLength,
@@ -2210,7 +2170,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					GLenum.GL_ARRAY_BUFFER,
 					buffer.BufferSize,
 					IntPtr.Zero,
-					(buffer as OpenGLBuffer).Dynamic
+					(buffer).Dynamic
 				);
 			}
 
@@ -2227,7 +2187,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		public void SetIndexBufferData(
-			IGLBuffer buffer,
+			GLBuffer buffer,
 			int offsetInBytes,
 			IntPtr data,
 			int dataLength,
@@ -2245,7 +2205,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					GLenum.GL_ELEMENT_ARRAY_BUFFER,
 					buffer.BufferSize,
 					IntPtr.Zero,
-					(buffer as OpenGLBuffer).Dynamic
+					(buffer).Dynamic
 				);
 			}
 
@@ -2266,7 +2226,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region glGetBufferData Methods
 
 		public void GetVertexBufferData(
-			IGLBuffer buffer,
+			GLBuffer buffer,
 			int offsetInBytes,
 			IntPtr data,
 			int startIndex,
@@ -2317,7 +2277,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		public void GetIndexBufferData(
-			IGLBuffer buffer,
+			GLBuffer buffer,
 			int offsetInBytes,
 			IntPtr data,
 			int startIndex,
@@ -2346,9 +2306,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region glDeleteBuffers Methods
 
-		private void DeleteVertexBuffer(IGLBuffer buffer)
+		private void DeleteVertexBuffer(GLBuffer buffer)
 		{
-			uint handle = (buffer as OpenGLBuffer).Handle;
+			uint handle = (buffer).Handle;
 			if (handle == currentVertexBuffer)
 			{
 				glBindBuffer(GLenum.GL_ARRAY_BUFFER, 0);
@@ -2365,9 +2325,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			glDeleteBuffers(1, ref handle);
 		}
 
-		private void DeleteIndexBuffer(IGLBuffer buffer)
+		private void DeleteIndexBuffer(GLBuffer buffer)
 		{
-			uint handle = (buffer as OpenGLBuffer).Handle;
+			uint handle = (buffer).Handle;
 			if (handle == currentIndexBuffer)
 			{
 				glBindBuffer(GLenum.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -4655,6 +4615,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				SDL.SDL_GL_MakeCurrent(WindowInfo, IntPtr.Zero);
 			}
 #else
+            // bartwe: hack
+            throw new Exception("Only call from the main thread");
+
+
 			ManualResetEventSlim resetEvent = new ManualResetEventSlim(false);
 			lock (actions)
 			{
@@ -4672,4 +4636,5 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 	}
+
 }
