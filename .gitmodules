@@ -3,7 +3,7 @@
 	url = git://github.com/flibitijibibo/SDL2-CS.git
 [submodule "lib/FACT"]
 	path = lib/FAudio
-	url = git://github.com/flibitijibibo/FACT.git
+	url = git://github.com/bartwe/FACT.git
 [submodule "lib/MojoShader-CS"]
 	path = lib/MojoShader-CS
 	url = git://github.com/bartwe/MojoShader-CS.git
