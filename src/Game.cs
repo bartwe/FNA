@@ -433,7 +433,7 @@ namespace Microsoft.Xna.Framework
 		public void Tick()
 		{
 			if (isInTickCall)
-				throw new Exception();
+				throw new Exception("Reentrant call to Game.Tick()");
 			isInTickCall = true;
 			/* NOTE: This code is very sensitive and can break very badly,
 			 * even with what looks like a safe change. Be sure to test
