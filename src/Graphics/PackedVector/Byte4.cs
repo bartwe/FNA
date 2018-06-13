@@ -71,6 +71,15 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 			PackedValue = Pack(x, y, z, w);
 		}
 
+        public Byte4(int x, int y, int z, int w)
+		{
+            PackedValue = 
+				((uint) x) |
+				(((uint) y) << 8) |
+				(((uint) z) << 16) |
+				(((uint) w) << 24);
+		}
+
 		#endregion
 
 		#region Public Methods
