@@ -28,10 +28,11 @@ namespace Microsoft.Xna.Framework.Audio {
         void SetDopplerScale(float scale);
         void SetSpeedOfSound(float speed);
 
-        IALBuffer GenBuffer(int sampleRate, AudioChannels channels);
+        ALBuffer GenBuffer(int sampleRate, AudioChannels channels);
 
-        IALBuffer GenBuffer(
-            byte[] data,
+        unsafe ALBuffer GenBuffer(
+            void* data,
+            int dataLength,
             uint sampleRate,
             uint channels,
             uint loopStart,
@@ -40,26 +41,26 @@ namespace Microsoft.Xna.Framework.Audio {
             uint formatParameter
             );
 
-        void DeleteBuffer(IALBuffer buffer);
+        void DeleteBuffer(ALBuffer buffer);
 
         void SetBufferData(
-            IALBuffer buffer,
+            ALBuffer buffer,
             IntPtr data,
             int offset,
             int count
             );
 
         void SetBufferFloatData(
-            IALBuffer buffer,
+            ALBuffer buffer,
             IntPtr data,
             int offset,
             int count
             );
 
-        IALBuffer ConvertStereoToMono(IALBuffer buffer);
+        ALBuffer ConvertStereoToMono(ALBuffer buffer);
 
         ALSourceHandle GenSource();
-        ALSourceHandle GenSource(IALBuffer buffer, bool isXACT);
+        ALSourceHandle GenSource(ALBuffer buffer, bool isXACT);
         void StopAndDisposeSource(ALSourceHandle sourceHandle);
         void PlaySource(ALSourceHandle sourceHandle);
         void PauseSource(ALSourceHandle sourceHandle);
@@ -74,19 +75,19 @@ namespace Microsoft.Xna.Framework.Audio {
         void SetSourceLowPassFilter(ALSourceHandle sourceHandle, float hfGain);
         void SetSourceHighPassFilter(ALSourceHandle sourceHandle, float lfGain);
         void SetSourceBandPassFilter(ALSourceHandle sourceHandle, float hfGain, float lfGain);
-        void QueueSourceBuffer(ALSourceHandle sourceHandle, IALBuffer buffer);
+        void QueueSourceBuffer(ALSourceHandle sourceHandle, ALBuffer buffer);
 
         void DequeueSourceBuffers(
             ALSourceHandle sourceHandle,
             int buffersToDequeue,
-            Queue<IALBuffer> errorCheck
+            Queue<ALBuffer> errorCheck
             );
 
         int CheckProcessedBuffers(ALSourceHandle sourceHandle);
 
         void GetBufferData(
             ALSourceHandle sourceHandle,
-            IALBuffer[] buffer,
+            ALBuffer[] buffer,
             IntPtr samples,
             int samplesLen,
             AudioChannels channels
@@ -124,11 +125,28 @@ namespace Microsoft.Xna.Framework.Audio {
         bool CaptureHasSamples(IntPtr handle);
     }
 
-    interface IALBuffer {
-        TimeSpan Duration { get; }
-        int Channels { get; }
-        int SampleRate { get; }
+
+    struct ALBuffer {
+        public uint Handle;
+
+        public TimeSpan Duration;
+
+        public int Channels;
+
+        public int SampleRate;
+
+        public ALBuffer(uint handle, TimeSpan duration, int channels, int sampleRate) {
+            Handle = handle;
+            Duration = duration;
+            Channels = channels;
+            SampleRate = sampleRate;
+        }
+
+        public bool IsNull() {
+            return (Handle == int.MaxValue) || (Channels == 0);
+        }
     }
+
 
     struct ALSourceHandle {
         public uint Handle { get; private set; }

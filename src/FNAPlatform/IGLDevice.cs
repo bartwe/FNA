@@ -593,21 +593,10 @@ namespace Microsoft.Xna.Framework.Graphics
     }
 
 
-    internal class GLBuffer {
-        public uint Handle {
-            get;
-            private set;
-        }
-
-        public IntPtr BufferSize {
-            get;
-            private set;
-        }
-
-        public GLenum Dynamic {
-            get;
-            private set;
-        }
+    internal struct GLBuffer {
+        public uint Handle;
+        public IntPtr BufferSize;
+        public GLenum Dynamic;
 
         public GLBuffer(
             uint handle,
@@ -619,9 +608,6 @@ namespace Microsoft.Xna.Framework.Graphics
             Dynamic = dynamic;
         }
 
-        private GLBuffer() {
-            Handle = 0;
-        }
         public static readonly GLBuffer NullBuffer = new GLBuffer();
     }
 

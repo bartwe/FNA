@@ -22,32 +22,7 @@ namespace Microsoft.Xna.Framework.Audio
 	 */
 	internal class NullALDevice : IALDevice
 	{
-		private class NullBuffer : IALBuffer
-		{
-			public TimeSpan Duration
-			{
-				get
-				{
-					// FIXME: Maybe read the PCM/ADPCM lengths? -flibit
-					return TimeSpan.Zero;
-				}
-			}
-			public int Channels
-			{
-				get
-				{
-					return 1;
-				}
-			}
-
-			public int SampleRate
-			{
-				get
-				{
-					return 1;
-				}
-			}
-		}
+		static ALBuffer NullBuffer = new ALBuffer(uint.MaxValue, TimeSpan.Zero, 1, 1);
 
 		private class NullReverb : IALReverb
 		{
@@ -92,13 +67,14 @@ namespace Microsoft.Xna.Framework.Audio
 			// No-op, duh.
 		}
 
-		public IALBuffer GenBuffer(int sampleRate, AudioChannels channels)
+		public ALBuffer GenBuffer(int sampleRate, AudioChannels channels)
 		{
-			return new NullBuffer();
+			return  NullBuffer;
 		}
 
-		public IALBuffer GenBuffer(
-			byte[] data,
+		public unsafe ALBuffer GenBuffer(
+			void* data,
+            int dataLength,
 			uint sampleRate,
 			uint channels,
 			uint loopStart,
@@ -106,16 +82,16 @@ namespace Microsoft.Xna.Framework.Audio
 			bool isADPCM,
 			uint formatParameter
 		) {
-			return new NullBuffer();
+            return NullBuffer;
 		}
 
-		public void DeleteBuffer(IALBuffer buffer)
+		public void DeleteBuffer(ALBuffer buffer)
 		{
 			// No-op, duh.
 		}
 
 		public void SetBufferData(
-			IALBuffer buffer,
+			ALBuffer buffer,
 			IntPtr data,
 			int offset,
 			int count
@@ -124,7 +100,7 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void SetBufferFloatData(
-			IALBuffer buffer,
+			ALBuffer buffer,
 			IntPtr data,
 			int offset,
 			int count
@@ -132,10 +108,10 @@ namespace Microsoft.Xna.Framework.Audio
 			// No-op, duh.
 		}
 
-		public IALBuffer ConvertStereoToMono(IALBuffer buffer)
+		public ALBuffer ConvertStereoToMono(ALBuffer buffer)
 		{
 			// No-op, we should never get here!
-			return null;
+            return NullBuffer;
 		}
 
 		public ALSourceHandle GenSource()
@@ -143,7 +119,7 @@ namespace Microsoft.Xna.Framework.Audio
 			return new ALSourceHandle(uint.MaxValue);
 		}
 
-		public ALSourceHandle GenSource(IALBuffer buffer, bool isXACT)
+		public ALSourceHandle GenSource(ALBuffer buffer, bool isXACT)
 		{
             return new ALSourceHandle(uint.MaxValue);
 		}
@@ -226,7 +202,7 @@ namespace Microsoft.Xna.Framework.Audio
 			// No-op, duh.
 		}
 
-		public void QueueSourceBuffer(ALSourceHandle sourceHandle, IALBuffer buffer)
+		public void QueueSourceBuffer(ALSourceHandle sourceHandle, ALBuffer buffer)
 		{
 			// No-op, duh.
 		}
@@ -234,7 +210,7 @@ namespace Microsoft.Xna.Framework.Audio
 		public void DequeueSourceBuffers(
 			ALSourceHandle sourceHandle,
 			int buffersToDequeue,
-			Queue<IALBuffer> errorCheck
+			Queue<ALBuffer> errorCheck
 		) {
 			// No-op, duh.
 		}
@@ -246,7 +222,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void GetBufferData(
 			ALSourceHandle sourceHandle,
-			IALBuffer[] buffer,
+			ALBuffer[] buffer,
 			IntPtr samples,
 			int samplesLen,
 			AudioChannels channels

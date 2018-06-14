@@ -34,7 +34,7 @@ namespace Microsoft.Xna.Framework.Content
 
 		#region Protected Read Method
 
-		protected internal override SoundEffect Read(
+		protected unsafe internal override SoundEffect Read(
 			ContentReader input,
 			SoundEffect existingInstance
 		) {
@@ -75,9 +75,11 @@ namespace Microsoft.Xna.Framework.Content
 			// Sound duration in milliseconds, unused
 			input.ReadUInt32();
 
+            fixed(void* datap = data)
 			return new SoundEffect(
 				input.AssetName,
-				data,
+				datap,
+                data.Length,
 				sampleRate,
 				channels,
 				loopStart,

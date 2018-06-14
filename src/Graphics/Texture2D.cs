@@ -168,6 +168,47 @@ namespace Microsoft.Xna.Framework.Graphics
 			handle.Free();
 		}
 
+	    public unsafe void SetData(
+	            int level,
+	            Rectangle? rect,
+	            void* data,
+                int elementSize,
+	            int startIndex,
+	            int elementCount
+	    ) {
+	        if (data == null) {
+	            throw new ArgumentNullException("data");
+	        }
+
+	        int x, y, w, h;
+	        if (rect.HasValue) {
+	            x = rect.Value.X;
+	            y = rect.Value.Y;
+	            w = rect.Value.Width;
+	            h = rect.Value.Height;
+	        }
+	        else {
+	            x = 0;
+	            y = 0;
+	            w = Math.Max(Width >> level, 1);
+	            h = Math.Max(Height >> level, 1);
+	        }
+
+	        GraphicsDevice.GLDevice.SetTextureData2D(
+	            texture,
+	            Format,
+	            x,
+	            y,
+	            w,
+	            h,
+	            level,
+	            (IntPtr)data,
+	            startIndex,
+	            elementCount,
+	            elementSize
+	            );
+	    }
+
 		#endregion
 
 		#region Public GetData Methods

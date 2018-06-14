@@ -104,21 +104,23 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Variables
 
-		internal List<WeakReference> Instances = new List<WeakReference>();
-		internal IALBuffer INTERNAL_buffer;
-		internal IALBuffer INTERNAL_monoBuffer;
+        internal List<SoundEffectInstance> Instances = new List<SoundEffectInstance>();
+		internal ALBuffer INTERNAL_buffer;
+		internal ALBuffer INTERNAL_monoBuffer;
 
 		#endregion
 
 		#region Public Constructors
 
-		public SoundEffect(
+		public unsafe SoundEffect(
 			byte[] buffer,
 			int sampleRate,
 			AudioChannels channels
 		) {
+            fixed (void* bufferp = buffer)
 			INTERNAL_buffer = AudioDevice.GenBuffer(
-				buffer,
+				bufferp,
+                buffer.Length,
 				(uint) sampleRate,
 				(uint) channels,
 				0,
@@ -128,7 +130,7 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 		}
 
-		public SoundEffect(
+		public unsafe SoundEffect(
 			byte[] buffer,
 			int offset,
 			int count,
@@ -137,20 +139,10 @@ namespace Microsoft.Xna.Framework.Audio
 			int loopStart,
 			int loopLength
 		) {
-			byte[] sendBuf;
-			if (offset != 0 || count != buffer.Length)
-			{
-				// I kind of hate this. -flibit
-				sendBuf = new byte[count];
-				Array.Copy(buffer, offset, sendBuf, 0, count);
-			}
-			else
-			{
-				sendBuf = buffer;
-			}
-
+            fixed (void* data = &buffer[offset])
 			INTERNAL_buffer = AudioDevice.GenBuffer(
-				sendBuf,
+                data,
+                count,
 				(uint) sampleRate,
 				(uint) channels,
 				(uint) loopStart,
@@ -169,9 +161,10 @@ namespace Microsoft.Xna.Framework.Audio
 			INTERNAL_loadAudioStream(s);
 		}
 
-		internal SoundEffect(
+		internal unsafe SoundEffect(
 			string name,
-			byte[] buffer,
+			void* data,
+            int dataLength,
 			uint sampleRate,
 			uint channels,
 			uint loopStart,
@@ -181,7 +174,8 @@ namespace Microsoft.Xna.Framework.Audio
 		) {
 			Name = name;
 			INTERNAL_buffer = AudioDevice.GenBuffer(
-				buffer,
+				data,
+                dataLength,
 				sampleRate,
 				channels,
 				loopStart,
@@ -208,25 +202,13 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (!IsDisposed)
 			{
-				/* FIXME: Is it ironic that we're generating
-				 * garbage with ToArray while cleaning up after
-				 * the program's leaks?
-				 * -flibit
-				 */
-				foreach (WeakReference instance in Instances.ToArray())
-				{
-					object target = instance.Target;
-					if (target != null)
-					{
-						(target as IDisposable).Dispose();
-					}
-				}
-				Instances.Clear();
-				if (INTERNAL_buffer != null)
+                while (Instances.Count > 0)
+                    Instances[0].Dispose();
+                if (!INTERNAL_buffer.IsNull())
 				{
 					AudioDevice.ALDevice.DeleteBuffer(INTERNAL_buffer);
 				}
-				if (INTERNAL_monoBuffer != null)
+                if (!INTERNAL_monoBuffer.IsNull())
 				{
 					AudioDevice.ALDevice.DeleteBuffer(INTERNAL_monoBuffer);
 				}
@@ -278,7 +260,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private WAV Loading Method
 
-		private void INTERNAL_loadAudioStream(Stream s)
+		private unsafe void INTERNAL_loadAudioStream(Stream s)
 		{
 			byte[] data;
 			uint sampleRate = 0;
@@ -358,8 +340,10 @@ namespace Microsoft.Xna.Framework.Audio
 				data = reader.ReadBytes(waveDataLength);
 			}
 
+            fixed (void* datap = data)
 			INTERNAL_buffer = AudioDevice.GenBuffer(
-				data,
+				datap,
+                data.Length,
 				sampleRate,
 				numChannels,
 				0,

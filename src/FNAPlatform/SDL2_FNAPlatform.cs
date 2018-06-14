@@ -542,6 +542,8 @@ namespace Microsoft.Xna.Framework
 
 		#region Event Loop
 
+        static char[] _charsSpare = new char[4096];
+
 		public static void RunLoop(Game game)
 		{
 			SDL.SDL_ShowWindow(game.Window.Handle);
@@ -780,9 +782,8 @@ namespace Microsoft.Xna.Framework
 					// Text Input
 					else if (evt.type == SDL.SDL_EventType.SDL_TEXTINPUT && !textInputSuppress)
 					{
-						string text;
-
 						// Based on the SDL2# LPUtf8StrMarshaler
+                        int chars = 0;
 						unsafe
 						{
 							byte* endPtr = evt.text.text;
@@ -790,14 +791,13 @@ namespace Microsoft.Xna.Framework
 							{
 								endPtr++;
 							}
-							byte[] bytes = new byte[endPtr - evt.text.text];
-							Marshal.Copy((IntPtr) evt.text.text, bytes, 0, bytes.Length);
-							text = System.Text.Encoding.UTF8.GetString(bytes);
+                            fixed (char* charsSparep = _charsSpare)
+                                chars = Encoding.UTF8.GetChars(evt.text.text, (int)( endPtr - evt.text.text), charsSparep, _charsSpare.Length);
 						}
 
-						foreach (char c in text)
+						for (int i = 0; i<chars; ++i)
 						{
-							TextInputEXT.OnTextInput(c);
+							TextInputEXT.OnTextInput(_charsSpare[i]);
 						}
 					}
 

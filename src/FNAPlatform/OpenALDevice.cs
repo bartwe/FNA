@@ -32,45 +32,6 @@ namespace Microsoft.Xna.Framework.Audio
 {
 	internal class OpenALDevice : IALDevice
 	{
-		#region OpenAL Buffer Container Class
-
-		private class OpenALBuffer : IALBuffer
-		{
-			public uint Handle
-			{
-				get;
-				private set;
-			}
-
-			public TimeSpan Duration
-			{
-				get;
-				private set;
-			}
-
-			public int Channels
-			{
-				get;
-				private set;
-			}
-
-			public int SampleRate
-			{
-				get;
-				private set;
-			}
-
-			public OpenALBuffer(uint handle, TimeSpan duration, int channels, int sampleRate)
-			{
-				Handle = handle;
-				Duration = duration;
-				Channels = channels;
-				SampleRate = sampleRate;
-			}
-		}
-
-		#endregion
-
 		#region OpenAL Reverb Effect Container Class
 
 		private class OpenALReverb : IALReverb
@@ -216,20 +177,21 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region OpenAL Buffer Methods
 
-		public IALBuffer GenBuffer(int sampleRate, AudioChannels channels)
+		public ALBuffer GenBuffer(int sampleRate, AudioChannels channels)
 		{
 			uint result;
 			AL10.alGenBuffers(1, out result);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
-			return new OpenALBuffer(result, TimeSpan.Zero, (int) channels, sampleRate);
+			return new ALBuffer(result, TimeSpan.Zero, (int) channels, sampleRate);
 		}
 
         int[] _loopArgumentsSpare = new int[2];
 
-		public IALBuffer GenBuffer(
-			byte[] data,
+		public unsafe ALBuffer GenBuffer(
+			void* data,
+            int dataLength,
 			uint sampleRate,
 			uint channels,
 			uint loopStart,
@@ -246,7 +208,7 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 
 			int format;
-			int length = data.Length;
+			int length = dataLength;
 			if (isADPCM)
 			{
 				format = (channels == 2) ?
@@ -286,7 +248,7 @@ namespace Microsoft.Xna.Framework.Audio
 			AL10.alBufferData(
 				result,
 				format,
-				data,
+				(IntPtr)data,
 				length,
 				(int) sampleRate
 			);
@@ -337,12 +299,12 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 
 			// Finally.
-			return new OpenALBuffer(result, resultDur, (int) channels, (int) sampleRate);
+			return new ALBuffer(result, resultDur, (int) channels, (int) sampleRate);
 		}
 
-		public void DeleteBuffer(IALBuffer buffer)
+		public void DeleteBuffer(ALBuffer buffer)
 		{
-			uint handle = (buffer as OpenALBuffer).Handle;
+			uint handle = buffer.Handle;
 			AL10.alDeleteBuffers(1, ref handle);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
@@ -350,18 +312,17 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void SetBufferData(
-			IALBuffer buffer,
+			ALBuffer buffer,
 			IntPtr data,
 			int offset,
 			int count
 		) {
-			OpenALBuffer buf = buffer as OpenALBuffer;
 			AL10.alBufferData(
-				buf.Handle,
-				XNAToShort[buf.Channels],
+                buffer.Handle,
+                XNAToShort[buffer.Channels],
 				data + offset,
 				count,
-				buf.SampleRate
+                buffer.SampleRate
 			);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
@@ -369,35 +330,33 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void SetBufferFloatData(
-			IALBuffer buffer,
+			ALBuffer buffer,
 			IntPtr data,
 			int offset,
 			int count
 		) {
-			OpenALBuffer buf = buffer as OpenALBuffer;
 			AL10.alBufferData(
-				buf.Handle,
-				XNAToFloat[buf.Channels],
+                buffer.Handle,
+                XNAToFloat[buffer.Channels],
 				data + (offset * 4),
 				count * 4,
-				buf.SampleRate
+                buffer.SampleRate
 			);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
 		}
 
-		public unsafe IALBuffer ConvertStereoToMono(IALBuffer buffer)
+		public unsafe ALBuffer ConvertStereoToMono(ALBuffer buffer)
 		{
-			OpenALBuffer buf = buffer as OpenALBuffer;
 			int bufLen, bits;
 			AL10.alGetBufferi(
-				buf.Handle,
+                buffer.Handle,
 				AL10.AL_SIZE,
 				out bufLen
 			);
 			AL10.alGetBufferi(
-				buf.Handle,
+                buffer.Handle,
 				AL10.AL_BITS,
 				out bits
 			);
@@ -411,7 +370,7 @@ namespace Microsoft.Xna.Framework.Audio
             fixed (void* datap = data) {
                 var dataPtr = (IntPtr)datap;
 			    ALEXT.alGetBufferSamplesSOFT(
-				    buf.Handle,
+                    buffer.Handle,
 				    0,
 				    bufLen / bits / 2,
 				    ALEXT.AL_STEREO_SOFT,
@@ -447,9 +406,11 @@ namespace Microsoft.Xna.Framework.Audio
             }
 			data = null;
 
+            fixed(void* monoDatap = monoData)
 			return GenBuffer(
-				monoData,
-				(uint) buf.SampleRate,
+				monoDatap,
+                monoData.Length,
+                (uint)buffer.SampleRate,
 				1,
 				0,
 				0,
@@ -481,7 +442,7 @@ namespace Microsoft.Xna.Framework.Audio
             return new ALSourceHandle(result);
 		}
 
-		public ALSourceHandle GenSource(IALBuffer buffer, bool isXACT)
+		public ALSourceHandle GenSource(ALBuffer buffer, bool isXACT)
 		{
 			uint result;
 			AL10.alGenSources(1, out result);
@@ -495,7 +456,7 @@ namespace Microsoft.Xna.Framework.Audio
 			AL10.alSourcei(
 				result,
 				AL10.AL_BUFFER,
-				(int) (buffer as OpenALBuffer).Handle
+				(int) buffer.Handle
 			);
 			AL10.alSourcef(
 				result,
@@ -711,9 +672,9 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 		}
 
-		public void QueueSourceBuffer(ALSourceHandle sourceHandle, IALBuffer buffer)
+		public void QueueSourceBuffer(ALSourceHandle sourceHandle, ALBuffer buffer)
 		{
-			uint buf = (buffer as OpenALBuffer).Handle;
+			uint buf = buffer.Handle;
 			AL10.alSourceQueueBuffers(
 				sourceHandle.Handle,
 				1,
@@ -727,7 +688,7 @@ namespace Microsoft.Xna.Framework.Audio
 		public void DequeueSourceBuffers(
 			ALSourceHandle sourceHandle,
 			int buffersToDequeue,
-			Queue<IALBuffer> errorCheck
+			Queue<ALBuffer> errorCheck
 		) {
 			uint[] bufs = new uint[buffersToDequeue];
 			AL10.alSourceUnqueueBuffers(
@@ -740,10 +701,10 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 #if DEBUG
 			// Error check our queuedBuffers list.
-			IALBuffer[] sync = errorCheck.ToArray();
+			ALBuffer[] sync = errorCheck.ToArray();
 			for (int i = 0; i < buffersToDequeue; i += 1)
 			{
-				if (bufs[i] != (sync[i] as OpenALBuffer).Handle)
+				if (bufs[i] != sync[i].Handle)
 				{
 					throw new InvalidOperationException("Buffer desync!");
 				}
@@ -767,7 +728,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void GetBufferData(
 			ALSourceHandle sourceHandle,
-			IALBuffer[] buffer,
+			ALBuffer[] buffer,
 			IntPtr samples,
 			int samplesLen,
 			AudioChannels channels
@@ -784,7 +745,7 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 
 			// Is that longer than what the active buffer has left...?
-			uint buf = (buffer[0] as OpenALBuffer).Handle;
+			uint buf = buffer[0].Handle;
 			int len;
 			AL10.alGetBufferi(
 				buf,
@@ -823,7 +784,7 @@ namespace Microsoft.Xna.Framework.Audio
 			if (buffer.Length > 1 && copySize2 > 0)
 			{
 				ALEXT.alGetBufferSamplesSOFT(
-					(buffer[1] as OpenALBuffer).Handle,
+					buffer[1].Handle,
 					0,
 					copySize2,
 					channels == AudioChannels.Stereo ?

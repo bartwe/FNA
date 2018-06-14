@@ -1997,7 +1997,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int vertexCount,
 			int vertexStride
 		) {
-			GLBuffer result = null;
+			GLBuffer result;
 
 #if !DISABLE_THREADING
 			ForceToMainThread(() => {
@@ -2031,7 +2031,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int indexCount,
 			IndexElementSize indexElementSize
 		) {
-			GLBuffer result = null;
+			GLBuffer result;
 
 #if !DISABLE_THREADING
 			ForceToMainThread(() => {

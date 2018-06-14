@@ -305,7 +305,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		 * want to prevent a resource from being collected by holding a
 		 * strong reference to it in this list.
 		 */
-		private readonly List<WeakReference> resources = new List<WeakReference>();
+        private readonly List<GraphicsResource> resources = new List<GraphicsResource>();
 		private readonly object resourcesLock = new object();
 
 		#endregion
@@ -496,15 +496,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					 */
 					lock (resourcesLock)
 					{
-						foreach (WeakReference resource in resources.ToArray())
-						{
-							object target = resource.Target;
-							if (target != null)
-							{
-								(target as IDisposable).Dispose();
-							}
-						}
-						resources.Clear();
+                        while (resources.Count > 0)
+                            resources[0].Dispose();
 					}
 
 					// Dispose of the GL Device/Context
@@ -528,7 +521,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Resource Management Methods
 
-		internal void AddResourceReference(WeakReference resourceReference)
+        internal void AddResourceReference(GraphicsResource resourceReference)
 		{
 			lock (resourcesLock)
 			{
@@ -536,7 +529,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		internal void RemoveResourceReference(WeakReference resourceReference)
+        internal void RemoveResourceReference(GraphicsResource resourceReference)
 		{
 			lock (resourcesLock)
 			{

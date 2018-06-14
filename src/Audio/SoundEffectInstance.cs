@@ -155,7 +155,6 @@ namespace Microsoft.Xna.Framework.Audio
 		#region Private Variables: XNA Implementation
 
 		private SoundEffect INTERNAL_parentEffect;
-		private WeakReference selfReference;
 
 		internal bool isDynamic;
 
@@ -182,8 +181,7 @@ namespace Microsoft.Xna.Framework.Audio
 			INTERNAL_parentEffect = parent;
 			if (INTERNAL_parentEffect != null)
 			{
-				selfReference = new WeakReference(this);
-				INTERNAL_parentEffect.Instances.Add(selfReference);
+                INTERNAL_parentEffect.Instances.Add(this);
 			}
 			isDynamic = false;
 		}
@@ -208,8 +206,7 @@ namespace Microsoft.Xna.Framework.Audio
 				Stop(true);
 				if (INTERNAL_parentEffect != null)
 				{
-					INTERNAL_parentEffect.Instances.Remove(selfReference);
-					selfReference = null;
+					INTERNAL_parentEffect.Instances.Remove(this);
 				}
 				IsDisposed = true;
 			}
@@ -227,7 +224,7 @@ namespace Microsoft.Xna.Framework.Audio
 				// Do we need to convert a stereo buffer to mono?
 				if (	!isDynamic &&
 					INTERNAL_parentEffect.INTERNAL_buffer.Channels == 2 &&
-					INTERNAL_parentEffect.INTERNAL_monoBuffer == null	)
+					INTERNAL_parentEffect.INTERNAL_monoBuffer.IsNull()	)
 				{
 					INTERNAL_parentEffect.INTERNAL_monoBuffer = AudioDevice.ALDevice.ConvertStereoToMono(
 						INTERNAL_parentEffect.INTERNAL_buffer
@@ -293,8 +290,8 @@ namespace Microsoft.Xna.Framework.Audio
 				InternalAlSourceHandle = ALSourceHandle.NullHandle;
 			}
 
-			IALBuffer srcBuf;
-			if (INTERNAL_positionalAudio && INTERNAL_parentEffect.INTERNAL_monoBuffer != null)
+			ALBuffer srcBuf;
+            if (INTERNAL_positionalAudio && !INTERNAL_parentEffect.INTERNAL_monoBuffer.IsNull())
 			{
 				srcBuf = INTERNAL_parentEffect.INTERNAL_monoBuffer;
 			}

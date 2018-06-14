@@ -38,14 +38,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				 */
 				if (graphicsDevice != null)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
-					selfReference = null;
+					graphicsDevice.RemoveResourceReference(this);
 				}
 
 				graphicsDevice = value;
 
-				selfReference = new WeakReference(this);
-				graphicsDevice.AddResourceReference(selfReference);
+                graphicsDevice.AddResourceReference(this);
 			}
 		}
 
@@ -70,8 +68,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		#endregion
 
 		#region Private Variables
-
-		private WeakReference selfReference;
 
 		private GraphicsDevice graphicsDevice;
 
@@ -157,10 +153,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Remove from the list of graphics resources
 				if (graphicsDevice != null)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
+					graphicsDevice.RemoveResourceReference(this);
 				}
 
-				selfReference = null;
 				graphicsDevice = null;
 				IsDisposed = true;
 			}

@@ -509,7 +509,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private WaveBank Entry Load Method
 
-		private void LoadWaveEntry(SoundStreamEntry entry, ushort track, BinaryReader reader)
+		private unsafe void LoadWaveEntry(SoundStreamEntry entry, ushort track, BinaryReader reader)
 		{
 			// Read Wavedata
 			reader.BaseStream.Seek(entry.PlayOffset, SeekOrigin.Begin);
@@ -518,9 +518,11 @@ namespace Microsoft.Xna.Framework.Audio
 			// Load SoundEffect based on codec
 			if (entry.Codec == 0x0) // PCM
 			{
+                fixed (void* entryDatap = entryData)
 				INTERNAL_sounds[track] = new SoundEffect(
 					"WaveBank Sound",
-					entryData,
+					entryDatap,
+                    entryData.Length,
 					entry.Frequency,
 					entry.Channels,
 					entry.LoopOffset,
@@ -531,9 +533,11 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			else if (entry.Codec == 0x2) // ADPCM
 			{
+                fixed (void* entryDatap = entryData)
 				INTERNAL_sounds[track] = new SoundEffect(
 					"WaveBank Sound",
-					entryData,
+					entryDatap,
+                    entryData.Length,
 					entry.Frequency,
 					entry.Channels,
 					entry.LoopOffset,

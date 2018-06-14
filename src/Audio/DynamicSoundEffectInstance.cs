@@ -51,9 +51,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private AL Variables
 
-		private Queue<IALBuffer> queuedBuffers;
-		private Queue<IALBuffer> buffersToQueue;
-		private Queue<IALBuffer> availableBuffers;
+		private Queue<ALBuffer> queuedBuffers;
+		private Queue<ALBuffer> buffersToQueue;
+		private Queue<ALBuffer> availableBuffers;
 
 		#endregion
 
@@ -73,9 +73,9 @@ namespace Microsoft.Xna.Framework.Audio
 			PendingBufferCount = 0;
 
 			isDynamic = true;
-			queuedBuffers = new Queue<IALBuffer>();
-			buffersToQueue = new Queue<IALBuffer>();
-			availableBuffers = new Queue<IALBuffer>();
+			queuedBuffers = new Queue<ALBuffer>();
+			buffersToQueue = new Queue<ALBuffer>();
+			availableBuffers = new Queue<ALBuffer>();
 		}
 
 		#endregion
@@ -160,7 +160,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Push buffer to the AL.
-			IALBuffer newBuf = availableBuffers.Dequeue();
+			ALBuffer newBuf = availableBuffers.Dequeue();
 			GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
 			AudioDevice.ALDevice.SetBufferData(
 				newBuf,
@@ -246,7 +246,7 @@ namespace Microsoft.Xna.Framework.Audio
 			// Queue the buffers to this source
 			while (buffersToQueue.Count > 0)
 			{
-				IALBuffer nextBuf = buffersToQueue.Dequeue();
+				ALBuffer nextBuf = buffersToQueue.Dequeue();
 				queuedBuffers.Enqueue(nextBuf);
 				AudioDevice.ALDevice.QueueSourceBuffer(InternalAlSourceHandle, nextBuf);
 			}
@@ -379,7 +379,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Push buffer to the AL.
-			IALBuffer newBuf = availableBuffers.Dequeue();
+			ALBuffer newBuf = availableBuffers.Dequeue();
 			GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
 			AudioDevice.ALDevice.SetBufferFloatData(
 				newBuf,
