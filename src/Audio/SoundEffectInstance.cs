@@ -179,22 +179,18 @@ namespace Microsoft.Xna.Framework.Audio
 		internal SoundEffectInstance(SoundEffect parent)
 		{
 			INTERNAL_parentEffect = parent;
-			if (INTERNAL_parentEffect != null)
-			{
-                INTERNAL_parentEffect.Instances.Add(this);
-			}
 			isDynamic = false;
 		}
 
 		#endregion
 
 		#region Destructor
-
+/*
 		~SoundEffectInstance()
 		{
 			Dispose();
 		}
-
+*/
 		#endregion
 
 		#region Public Dispose Method
@@ -204,10 +200,6 @@ namespace Microsoft.Xna.Framework.Audio
 			if (!IsDisposed)
 			{
 				Stop(true);
-				if (INTERNAL_parentEffect != null)
-				{
-					INTERNAL_parentEffect.Instances.Remove(this);
-				}
 				IsDisposed = true;
 			}
 		}

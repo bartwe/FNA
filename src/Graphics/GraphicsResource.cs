@@ -84,14 +84,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		internal GraphicsResource()
 		{
 		}
-
+/*
 		~GraphicsResource()
 		{
 			// Pass false so the managed objects are not released
 			// FIXME: This can lock up your game from the GC! -flibit
 			// Dispose(false);
 		}
-
+*/
 		#endregion
 
 		#region Public Dispose Method

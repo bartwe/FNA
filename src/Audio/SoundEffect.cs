@@ -104,7 +104,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Variables
 
-        internal List<SoundEffectInstance> Instances = new List<SoundEffectInstance>();
 		internal ALBuffer INTERNAL_buffer;
 		internal ALBuffer INTERNAL_monoBuffer;
 
@@ -188,12 +187,12 @@ namespace Microsoft.Xna.Framework.Audio
 		#endregion
 
 		#region Destructor
-
+/*
 		~SoundEffect()
 		{
 			Dispose();
 		}
-
+*/
 		#endregion
 
 		#region Public Dispose Method
@@ -202,8 +201,6 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (!IsDisposed)
 			{
-                while (Instances.Count > 0)
-                    Instances[0].Dispose();
                 if (!INTERNAL_buffer.IsNull())
 				{
 					AudioDevice.ALDevice.DeleteBuffer(INTERNAL_buffer);
