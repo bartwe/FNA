@@ -123,8 +123,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Variables
 
-		internal List<SoundEffectInstance> Instances = new List<SoundEffectInstance>();
-		internal List<SoundEffectInstance> FireAndForgetInstances = new List<SoundEffectInstance>();
 		internal FAudio.FAudioBuffer handle;
 		internal FAudio.FAudioWaveFormatEx format;
 		internal uint loopStart;
@@ -259,12 +257,6 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (!IsDisposed)
 			{
-				foreach (SoundEffectInstance instance in Instances)
-				{
-					instance.parentEffect = null;
-					instance.Dispose();
-				}
-				Instances.Clear();
 				Marshal.FreeHGlobal(handle.pAudioData);
 				IsDisposed = true;
 			}

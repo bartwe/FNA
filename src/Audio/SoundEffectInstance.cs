@@ -131,7 +131,7 @@ namespace Microsoft.Xna.Framework.Audio
 		internal SoundEffect parentEffect;
 		private bool hasStarted;
 		private bool is3D;
-		private bool instanceRegistered;
+		private bool fireAndForgetInstanceRegistered;
 		private FAudio.F3DAUDIO_DSP_SETTINGS dspSettings;
 		private FAudio.OnStreamEndFunc OnStreamEndFunc;
 
@@ -150,12 +150,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (fireAndForget)
 				{
-					parentEffect.FireAndForgetInstances.Add(this);
-				}
-				else
-				{
-					instanceRegistered = true;
-					parentEffect.Instances.Add(this);
+					fireAndForgetInstanceRegistered = true;
 				}
 			}
 			isDynamic = this is DynamicSoundEffectInstance;
@@ -370,12 +365,11 @@ namespace Microsoft.Xna.Framework.Audio
 					FrameworkDispatcher.Streams.Remove(self);
 					self.ClearBuffers();
 				}
-				if (parentEffect != null && !instanceRegistered)
+				if (parentEffect != null && fireAndForgetInstanceRegistered)
 				{
 					Marshal.FreeHGlobal(dspSettings.pMatrixCoefficients);
 					Marshal.FreeHGlobal(callbacks);
 					IsDisposed = true;
-					parentEffect.FireAndForgetInstances.Remove(this);
 				}
 			}
 			else
@@ -397,10 +391,6 @@ namespace Microsoft.Xna.Framework.Audio
 			if (!IsDisposed)
 			{
 				Stop(true);
-				if (parentEffect != null)
-				{
-					parentEffect.Instances.Remove(this);
-				}
 				Marshal.FreeHGlobal(dspSettings.pMatrixCoefficients);
 				Marshal.FreeHGlobal(callbacks);
 				IsDisposed = true;
