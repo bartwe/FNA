@@ -15,10 +15,13 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using Microsoft.Xna.Framework.Design;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -38,6 +41,8 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		public byte B
 		{
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				unchecked
@@ -45,6 +50,8 @@ namespace Microsoft.Xna.Framework
 					return (byte) (this.PackedValue >> 16);
 				}
 			}
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.PackedValue = (this.PackedValue & 0xff00ffff) | ((uint) value << 16);
@@ -56,6 +63,8 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		public byte G
 		{
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				unchecked
@@ -63,6 +72,8 @@ namespace Microsoft.Xna.Framework
 					return (byte) (this.PackedValue >> 8);
 				}
 			}
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.PackedValue = (this.PackedValue & 0xffff00ff) | ((uint) value << 8);
@@ -74,6 +85,8 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		public byte R
 		{
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				unchecked
@@ -81,6 +94,8 @@ namespace Microsoft.Xna.Framework
 					return (byte) (this.PackedValue);
 				}
 			}
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.PackedValue = (this.PackedValue & 0xffffff00) | value;
@@ -92,6 +107,8 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		public byte A
 		{
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				unchecked
@@ -99,6 +116,8 @@ namespace Microsoft.Xna.Framework
 					return (byte) (this.PackedValue >> 24);
 				}
 			}
+			[TargetedPatchingOptOut("")]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.PackedValue = (this.PackedValue & 0x00ffffff) | ((uint) value << 24);
@@ -1682,9 +1701,9 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Constructors
 
-		private Color(uint packedValue)
+		private Color(uint PackedValue)
 		{
-			this.PackedValue = packedValue;
+			this.PackedValue = PackedValue;
 		}
 
 		#endregion
@@ -1900,5 +1919,6 @@ namespace Microsoft.Xna.Framework
 		}
 
 		#endregion
+
 	}
 }
