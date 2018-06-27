@@ -46,6 +46,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
+		bool isDisposing;
+
 		public GraphicsDeviceStatus GraphicsDeviceStatus
 		{
 			get
@@ -70,6 +72,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get;
 			private set;
+		}
+
+		public bool MultiSampleFailedEXT
+		{
+			get
+			{
+				return GLDevice.MultiSampleFailedEXT;
+			}
 		}
 
 		#endregion
@@ -472,6 +482,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (disposing)
 				{
+					isDisposing = true;
 					// We're about to dispose, notify the application.
 					if (Disposing != null)
 					{
@@ -481,11 +492,11 @@ namespace Microsoft.Xna.Framework.Graphics
 					/* Dispose of all remaining graphics resources before
 					 * disposing of the GraphicsDevice.
 					 */
+
 					lock (resourcesLock)
 					{
 						foreach (GraphicsResource resource in resources)
 						{
-							resource.graphicsDevice = null;
 							resource.Dispose();
 						}
 						resources.Clear();
@@ -502,6 +513,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						wiiuStream = IntPtr.Zero;
 					}
 #endif
+					isDisposing = false;
 				}
 
 				IsDisposed = true;
@@ -524,6 +536,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			lock (resourcesLock)
 			{
+				if (isDisposing)
+					return;
 				resources.Remove(resourceReference);
 			}
 		}
