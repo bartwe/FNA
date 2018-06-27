@@ -123,7 +123,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Variables
 
-		internal List<WeakReference> Instances = new List<WeakReference>();
+		internal List<SoundEffectInstance> Instances = new List<SoundEffectInstance>();
 		internal List<SoundEffectInstance> FireAndForgetInstances = new List<SoundEffectInstance>();
 		internal FAudio.FAudioBuffer handle;
 		internal FAudio.FAudioWaveFormatEx format;
@@ -253,33 +253,16 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Destructor
-
-		~SoundEffect()
-		{
-			Dispose();
-		}
-
-		#endregion
-
 		#region Public Methods
 
 		public void Dispose()
 		{
 			if (!IsDisposed)
 			{
-				/* FIXME: Is it ironic that we're generating
-				 * garbage with ToArray while cleaning up after
-				 * the program's leaks?
-				 * -flibit
-				 */
-				foreach (WeakReference instance in Instances.ToArray())
+				foreach (SoundEffectInstance instance in Instances)
 				{
-					object target = instance.Target;
-					if (target != null)
-					{
-						(target as IDisposable).Dispose();
-					}
+					instance.parentEffect = null;
+					instance.Dispose();
 				}
 				Instances.Clear();
 				Marshal.FreeHGlobal(handle.pAudioData);

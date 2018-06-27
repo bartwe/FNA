@@ -128,10 +128,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private Variables
 
-		private SoundEffect parentEffect;
-		private WeakReference selfReference;
+		internal SoundEffect parentEffect;
 		private bool hasStarted;
 		private bool is3D;
+		private bool instanceRegistered;
 		private FAudio.F3DAUDIO_DSP_SETTINGS dspSettings;
 		private FAudio.OnStreamEndFunc OnStreamEndFunc;
 
@@ -150,13 +150,12 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				if (fireAndForget)
 				{
-					selfReference = null;
 					parentEffect.FireAndForgetInstances.Add(this);
 				}
 				else
 				{
-					selfReference = new WeakReference(this);
-					parentEffect.Instances.Add(selfReference);
+					instanceRegistered = true;
+					parentEffect.Instances.Add(this);
 				}
 			}
 			isDynamic = this is DynamicSoundEffectInstance;
@@ -183,15 +182,6 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				InitDSPSettings(parentEffect.format.nChannels);
 			}
-		}
-
-		#endregion
-
-		#region Destructor
-
-		~SoundEffectInstance()
-		{
-			Dispose();
 		}
 
 		#endregion
@@ -376,12 +366,11 @@ namespace Microsoft.Xna.Framework.Audio
 
 				if (isDynamic)
 				{
-					FrameworkDispatcher.Streams.Remove(
-						this as DynamicSoundEffectInstance
-					);
-					(this as DynamicSoundEffectInstance).ClearBuffers();
+					DynamicSoundEffectInstance self = this as DynamicSoundEffectInstance;
+					FrameworkDispatcher.Streams.Remove(self);
+					self.ClearBuffers();
 				}
-				if (parentEffect != null && selfReference == null)
+				if (parentEffect != null && instanceRegistered)
 				{
 					Marshal.FreeHGlobal(dspSettings.pMatrixCoefficients);
 					Marshal.FreeHGlobal(callbacks);
@@ -408,10 +397,9 @@ namespace Microsoft.Xna.Framework.Audio
 			if (!IsDisposed)
 			{
 				Stop(true);
-				if (parentEffect != null && selfReference != null)
+				if (parentEffect != null)
 				{
-					parentEffect.Instances.Remove(selfReference);
-					selfReference = null;
+					parentEffect.Instances.Remove(this);
 				}
 				Marshal.FreeHGlobal(dspSettings.pMatrixCoefficients);
 				Marshal.FreeHGlobal(callbacks);

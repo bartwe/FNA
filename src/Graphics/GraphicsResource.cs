@@ -38,14 +38,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				 */
 				if (graphicsDevice != null)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
-					selfReference = null;
+					graphicsDevice.RemoveResourceReference(this);
 				}
 
 				graphicsDevice = value;
 
-				selfReference = new WeakReference(this);
-				graphicsDevice.AddResourceReference(selfReference);
+				graphicsDevice.AddResourceReference(this);
 			}
 		}
 
@@ -71,9 +69,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private WeakReference selfReference;
-
-		private GraphicsDevice graphicsDevice;
+		internal GraphicsDevice graphicsDevice;
 
 		#endregion
 
@@ -83,17 +79,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Internal Constructor and Deconstructor
+		#region Internal Constructor
 
 		internal GraphicsResource()
 		{
-		}
-
-		~GraphicsResource()
-		{
-			// Pass false so the managed objects are not released
-			// FIXME: This can lock up your game from the GC! -flibit
-			// Dispose(false);
 		}
 
 		#endregion
@@ -157,10 +146,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Remove from the list of graphics resources
 				if (graphicsDevice != null)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
+					graphicsDevice.RemoveResourceReference(this);
 				}
 
-				selfReference = null;
 				graphicsDevice = null;
 				IsDisposed = true;
 			}

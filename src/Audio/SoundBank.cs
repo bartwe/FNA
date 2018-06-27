@@ -47,7 +47,6 @@ namespace Microsoft.Xna.Framework.Audio
 		#region Private Variables
 
 		private IntPtr handle;
-		private WeakReference selfReference;
 
 		#endregion
 
@@ -86,7 +85,6 @@ namespace Microsoft.Xna.Framework.Audio
 			buffer = null;
 
 			engine = audioEngine;
-			selfReference = new WeakReference(this);
 			dspSettings = new FAudio.F3DAUDIO_DSP_SETTINGS();
 			dspSettings.SrcChannelCount = 1;
 			dspSettings.DstChannelCount = engine.channels;
@@ -95,17 +93,8 @@ namespace Microsoft.Xna.Framework.Audio
 				(int) dspSettings.SrcChannelCount *
 				(int) dspSettings.DstChannelCount
 			);
-			engine.RegisterSoundBank(handle, selfReference);
+			engine.RegisterSoundBank(handle, this);
 			IsDisposed = false;
-		}
-
-		#endregion
-
-		#region Destructor
-
-		~SoundBank()
-		{
-			Dispose(false);
 		}
 
 		#endregion
@@ -263,7 +252,6 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			IsDisposed = true;
 			handle = IntPtr.Zero;
-			selfReference = null;
 		}
 
 		#endregion

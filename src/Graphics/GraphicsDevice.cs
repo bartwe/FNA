@@ -292,12 +292,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Disposal Variables
 
-		/* Use WeakReference for the global resources list as we do not
-		 * know when a resource may be disposed and collected. We do not
-		 * want to prevent a resource from being collected by holding a
-		 * strong reference to it in this list.
-		 */
-		private readonly List<WeakReference> resources = new List<WeakReference>();
+		private readonly List<GraphicsResource> resources = new List<GraphicsResource>();
 		private readonly object resourcesLock = new object();
 
 		#endregion
@@ -488,13 +483,10 @@ namespace Microsoft.Xna.Framework.Graphics
 					 */
 					lock (resourcesLock)
 					{
-						foreach (WeakReference resource in resources.ToArray())
+						foreach (GraphicsResource resource in resources)
 						{
-							object target = resource.Target;
-							if (target != null)
-							{
-								(target as IDisposable).Dispose();
-							}
+							resource.graphicsDevice = null;
+							resource.Dispose();
 						}
 						resources.Clear();
 					}
@@ -520,7 +512,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Resource Management Methods
 
-		internal void AddResourceReference(WeakReference resourceReference)
+		internal void AddResourceReference(GraphicsResource resourceReference)
 		{
 			lock (resourcesLock)
 			{
@@ -528,7 +520,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		internal void RemoveResourceReference(WeakReference resourceReference)
+		internal void RemoveResourceReference(GraphicsResource resourceReference)
 		{
 			lock (resourcesLock)
 			{
@@ -634,22 +626,13 @@ namespace Microsoft.Xna.Framework.Graphics
 				DeviceResetting(this, EventArgs.Empty);
 			}
 
-			/* FIXME: Why are we not doing this...? -flibit
 			lock (resourcesLock)
 			{
-				foreach (WeakReference resource in resources)
+				foreach (GraphicsResource resource in resources)
 				{
-					object target = resource.Target;
-					if (target != null)
-					{
-						(target as GraphicsResource).GraphicsDeviceResetting();
-					}
+					resource.GraphicsDeviceResetting();
 				}
-
-				// Remove references to resources that have been garbage collected.
-				resources.RemoveAll(wr => !wr.IsAlive);
 			}
-			*/
 
 			/* Reset the backbuffer first, before doing anything else.
 			 * The GLDevice needs to know what we're up to right away.

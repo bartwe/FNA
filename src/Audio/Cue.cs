@@ -107,7 +107,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		private IntPtr handle;
 		private SoundBank bank;
-		private WeakReference selfReference;
 
 		#endregion
 
@@ -125,17 +124,7 @@ namespace Microsoft.Xna.Framework.Audio
 			Name = name;
 			bank = soundBank;
 
-			selfReference = new WeakReference(this);
-			bank.engine.RegisterCue(handle, selfReference);
-		}
-
-		#endregion
-
-		#region Destructor
-
-		~Cue()
-		{
-			Dispose(false);
+			bank.engine.RegisterCue(handle, this);
 		}
 
 		#endregion
@@ -261,7 +250,6 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			IsDisposed = true;
 			handle = IntPtr.Zero;
-			selfReference = null;
 		}
 
 		#endregion
