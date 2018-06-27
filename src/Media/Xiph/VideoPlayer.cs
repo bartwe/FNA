@@ -470,7 +470,7 @@ namespace Microsoft.Xna.Framework.Media
 					Video.theora,
 					yuvData,
 					thisFrame - currentFrame
-				) == 1) {
+				) == 1 || currentFrame == -1) {
 					UpdateTexture();
 				}
 				currentFrame = thisFrame;
@@ -593,8 +593,6 @@ namespace Microsoft.Xna.Framework.Media
 					Video.Width,
 					Video.Height
 				);
-
-				UpdateTexture();
 			}
 
 			// The player can finally start now!
@@ -765,10 +763,9 @@ namespace Microsoft.Xna.Framework.Media
 						break;
 					}
 				}
-				currentFrame = -1;
 			}
 
-			currentFrame = 0;
+			currentFrame = -1;
 		}
 
 		#endregion
