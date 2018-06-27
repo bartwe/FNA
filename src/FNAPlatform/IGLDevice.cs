@@ -63,6 +63,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
+		bool MultiSampleFailedEXT
+		{
+			get;
+		}
+
 		void Dispose();
 
 		void ResetBackbuffer(
@@ -555,7 +560,18 @@ namespace Microsoft.Xna.Framework.Graphics
 		GL_DEBUG_SEVERITY_HIGH_ARB = 0x9146,
 		GL_DEBUG_SEVERITY_MEDIUM_ARB = 0x9147,
 		GL_DEBUG_SEVERITY_LOW_ARB = 0x9148,
-		GL_DEBUG_SEVERITY_NOTIFICATION_ARB = 0x826B
+		GL_DEBUG_SEVERITY_NOTIFICATION_ARB = 0x826B,
+		GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB = 0x8242,
+		GL_NO_ERROR = 0,
+		GL_INVALID_ENUM = 0x0500,
+		GL_INVALID_VALUE = 0x0501,
+		GL_INVALID_OPERATION = 0x0502,
+		GL_STACK_OVERFLOW = 0x0503,
+		GL_STACK_UNDERFLOW = 0x0504,
+		GL_OUT_OF_MEMORY = 0x0505,
+		GL_INVALID_FRAMEBUFFER_OPERATION = 0x0506,
+		GL_CONTEXT_LOST = 0x0507,
+		GL_TABLE_TOO_LARGE = 0x8031
 	}
 
 	internal struct GLBuffer {

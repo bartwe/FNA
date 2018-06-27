@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using SDL2;
@@ -640,6 +641,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr userParam // const GLvoid*
 		);
 		private DebugProc DebugCall = DebugCallback;
+		enum DebugSyncState { Async, Sync, Disabled };
+		static DebugSyncState debugSyncState = DebugSyncState.Async;
+		static OpenGLDevice This;
+		static bool XSplit_GL_SwapWindow_WorkaroundFlag;
+		static bool XSplit_GL_SwapWindow_WarnOnce = true;
 		private static void DebugCallback(
 			GLenum source,
 			GLenum type,
@@ -649,21 +655,62 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr message, // const GLchar*
 			IntPtr userParam // const GLvoid*
 		) {
+			bool xsplitSuppression = false;
+			if (XSplit_GL_SwapWindow_WorkaroundFlag) {
+				if ((id == 0x502) && (source == GLenum.GL_DEBUG_SOURCE_API_ARB) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
+					&& (severity == GLenum.GL_DEBUG_SEVERITY_HIGH_ARB)) {
+					//GL_INVALID_OPERATION error generated. Render buffer not bound.
+					// We get this debug callback on every frame swap when xsplit is hooked into the game, suppress.
+					if (XSplit_GL_SwapWindow_WarnOnce) {
+						XSplit_GL_SwapWindow_WarnOnce = false;
+					}
+					else
+						return;
+					FNALoggerEXT.LogWarn("XSplit GL_SwapWindow GL_INVALID_OPERATION workaround enabled.");
+					xsplitSuppression = true;
+				}
+			}
+
 			string err = (
 				Marshal.PtrToStringAnsi(message) +
 				"\n\tSource: " +
 				source.ToString() +
 				"\n\tType: " +
 				type.ToString() +
+				"\n\tId: 0x" +
+				id.ToString("X") +
 				"\n\tSeverity: " +
 				severity.ToString()
 			);
-			if (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
+
+			if ((!xsplitSuppression) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB))
 			{
+				if (err.Contains("GL_INVALID_OPERATION") && err.Contains(" SAMPLES "))
+					This.MultiSampleFailedEXT = true;
+
+				var logStack = false;
+
+				if (debugSyncState == DebugSyncState.Async) {
+					This.glEnable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+					debugSyncState = DebugSyncState.Sync;
+				}
+				else 
+				if (debugSyncState == DebugSyncState.Sync) {
+					This.glDisable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+					debugSyncState = DebugSyncState.Disabled;
+					logStack = true;
+				}
+
+				if (logStack)
+					err += "\n" + Environment.StackTrace;
+
 				FNALoggerEXT.LogError(err);
-				throw new InvalidOperationException(err);
+
+				if (Debugger.IsAttached)
+					throw new InvalidOperationException("ARB_debug_output found an error: " + err);
 			}
-			FNALoggerEXT.LogWarn(err);
+			else
+				FNALoggerEXT.LogWarn(err);
 		}
 
 		/* END DEBUG OUTPUT FUNCTIONS */
@@ -701,7 +748,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				baseErrorString = "OpenGL 2.1";
 			}
-			baseErrorString += " support is required!";
+			baseErrorString += " support is required.";
 
 			/* Basic entry points. If you don't have these, you're screwed. */
 			try
@@ -1097,18 +1144,19 @@ namespace Microsoft.Xna.Framework.Graphics
 					typeof(GetQueryObjectuiv)
 				);
 			}
-			catch
+			catch(Exception e)
 			{
 				if (useES3)
 				{
-					FNALoggerEXT.LogWarn("Some non-ES functions failed to load. Beware...");
+					FNALoggerEXT.LogWarn("Some non-ES functions failed to load. Beware... ("+e.Message+")");
 				}
 				else
 				{
 					throw new NoSuitableGraphicsDeviceException(
 						baseErrorString +
 						"\nFailed on Tex3D/Query entries\n" +
-						driver
+						driver +
+						" ("+e.Message+")"
 					);
 				}
 			}
@@ -1157,9 +1205,9 @@ namespace Microsoft.Xna.Framework.Graphics
 					typeof(RenderbufferStorage)
 				);
 			}
-			catch
+			catch(Exception e)
 			{
-				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required!");
+				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required! ("+e.Message+")");
 			}
 
 			/* EXT_framebuffer_blit (or ARB_framebuffer_object) is needed by the faux-backbuffer. */
@@ -1267,9 +1315,9 @@ namespace Microsoft.Xna.Framework.Graphics
 						typeof(BindVertexArray)
 					);
 				}
-				catch
+				catch(Exception e)
 				{
-					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required!");
+					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required. ("+e.Message+")");
 				}
 			}
 

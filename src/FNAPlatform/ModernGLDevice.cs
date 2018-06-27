@@ -429,6 +429,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		public bool MultiSampleFailedEXT {
+			get { return false; }
+		}
+
 		#region Private Vertex Attribute Cache
 
 		private class VertexAttribute

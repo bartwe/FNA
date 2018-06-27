@@ -438,6 +438,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
+		public bool MultiSampleFailedEXT
+		{
+			get;
+			private set;
+		}
+
 		private bool supportsMultisampling;
 		private bool supportsFauxBackbuffer;
 		private bool supportsBaseVertex;
@@ -524,6 +530,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			PresentationParameters presentationParameters,
 			GraphicsAdapter adapter
 		) {
+            This = this;
 			// Create OpenGL context
 			glContext = SDL.SDL_GL_CreateContext(
 				presentationParameters.DeviceWindowHandle
@@ -927,10 +934,11 @@ namespace Microsoft.Xna.Framework.Graphics
 					glEnable(GLenum.GL_SCISSOR_TEST);
 				}
 
+				XSplit_GL_SwapWindow_WorkaroundFlag = true;
 				SDL.SDL_GL_SwapWindow(
 					overrideWindowHandle
 				);
-
+				XSplit_GL_SwapWindow_WorkaroundFlag = false;
 				BindFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
 			}
 			else
