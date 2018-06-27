@@ -370,7 +370,7 @@ namespace Microsoft.Xna.Framework.Audio
 					FrameworkDispatcher.Streams.Remove(self);
 					self.ClearBuffers();
 				}
-				if (parentEffect != null && instanceRegistered)
+				if (parentEffect != null && !instanceRegistered)
 				{
 					Marshal.FreeHGlobal(dspSettings.pMatrixCoefficients);
 					Marshal.FreeHGlobal(callbacks);
