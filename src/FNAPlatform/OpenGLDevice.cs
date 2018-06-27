@@ -637,7 +637,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				if (!supportsFauxBackbuffer)
 				{
 					throw new NoSuitableGraphicsDeviceException(
-						"Your hardware does not support the faux-backbuffer!" +
+						"Your hardware does not support the faux-backbuffer." +
 						"\n\nKeep the window/backbuffer resolution the same."
 					);
 				}
@@ -777,7 +777,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					if (!supportsFauxBackbuffer)
 					{
 						throw new NoSuitableGraphicsDeviceException(
-							"Your hardware does not support the faux-backbuffer!" +
+							"Your hardware does not support the faux-backbuffer." +
 							"\n\nKeep the window/backbuffer resolution the same."
 						);
 					}

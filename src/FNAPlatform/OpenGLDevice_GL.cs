@@ -733,7 +733,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			catch
 			{
-				throw new NoSuitableGraphicsDeviceException("GRAPHICS DRIVER IS EXTREMELY BROKEN!");
+				throw new NoSuitableGraphicsDeviceException("OpenGL driver does not support minimal feature set, glGetString not found.");
 			}
 		}
 
@@ -1207,7 +1207,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			catch(Exception e)
 			{
-				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required! ("+e.Message+")");
+				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required. ("+e.Message+")");
 			}
 
 			/* EXT_framebuffer_blit (or ARB_framebuffer_object) is needed by the faux-backbuffer. */
@@ -1370,7 +1370,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr stringMarkerCallback = SDL.SDL_GL_GetProcAddress("glStringMarkerGREMEDY");
 			if (stringMarkerCallback == IntPtr.Zero)
 			{
-				FNALoggerEXT.LogWarn("GREMEDY_string_marker not supported!");
+				FNALoggerEXT.LogWarn("GREMEDY_string_marker not supported.");
 			}
 			else
 			{

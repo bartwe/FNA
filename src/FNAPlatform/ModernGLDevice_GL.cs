@@ -1008,7 +1008,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				catch
 				{
-					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required!");
+					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required.");
 				}
 			}
 
