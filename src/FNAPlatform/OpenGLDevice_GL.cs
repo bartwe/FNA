@@ -657,6 +657,13 @@ namespace Microsoft.Xna.Framework.Graphics
 		static OpenGLDevice This;
         static bool XSplit_GL_SwapWindow_WorkaroundFlag;
         static bool XSplit_GL_SwapWindow_WarnOnce = true;
+
+        static GLenum prevMessageSource;
+        static GLenum prevMessageType;
+        static uint prevMessageId;
+        static GLenum prevMessageSeverity;
+        static int prevMessageLength; //cludge
+
 		private static void DebugCallback(
 			GLenum source,
 			GLenum type,
@@ -666,6 +673,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr message, // const GLchar*
 			IntPtr userParam // const GLvoid*
 		) {
+            if ((prevMessageSource == source)&&(prevMessageType == type)&&(prevMessageId==id)&&(prevMessageSeverity == severity)&&(prevMessageLength == length))
+                return; // duplicate message suppressed
+            prevMessageSource = source;
+            prevMessageType = type;
+            prevMessageId=id;
+            prevMessageSeverity = severity;
+            prevMessageLength = length;
+
             bool xsplitSuppression = false;
 		    if (XSplit_GL_SwapWindow_WorkaroundFlag) {
 		        if ((id == 0x502) && (source == GLenum.GL_DEBUG_SOURCE_API_ARB) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
@@ -717,8 +732,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 				FNALoggerEXT.LogError(err);
 
-                if (Debugger.IsAttached)
-				    throw new InvalidOperationException("ARB_debug_output found an error: " + err);
+                //if (Debugger.IsAttached)
+				//    throw new InvalidOperationException("ARB_debug_output found an error: " + err);
 			}
             else
 			    FNALoggerEXT.LogWarn(err);
