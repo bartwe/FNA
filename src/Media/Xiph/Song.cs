@@ -10,6 +10,8 @@
 #region Using Statements
 using System;
 using System.IO;
+using System.Runtime.ExceptionServices;
+using System.Security;
 using System.Threading;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -364,6 +366,8 @@ namespace Microsoft.Xna.Framework.Media
 		#region Private Song Update Thread
 
 		// DISABLE_THREADS: DELETE THIS CODE WHEN USING IN XNA4!
+        [HandleProcessCorruptedStateExceptions]
+        [SecurityCritical]
 		private void SongThread()
 		{
 			while (!exitThread)
