@@ -241,7 +241,7 @@ namespace Microsoft.Xna.Framework.Audio
 			// Set up our final position according to orientation of listener
 			position = Vector3.Transform(
 				emitter.Position - listener.Position,
-				Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up)
+				Matrix.Invert(Matrix.CreateWorld(Vector3.Zero, -listener.Forward, -listener.Up))
 			);
 
 			// XACT doesn't do automated attenuation!
