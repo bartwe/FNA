@@ -344,8 +344,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Read the image data from the stream
 			int width, height;
-			byte[] pixels;
-			TextureDataFromStreamEXT(stream, out width, out height, out pixels);
+			byte[] pixels = null;
+			TextureDataFromStreamEXT(stream, out width, out height, ref pixels);
 
 			// Create the Texture2D from the raw pixel data
 			Texture2D result = new Texture2D(
@@ -366,12 +366,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			// Read the image data from the stream
 			int realWidth, realHeight;
-			byte[] pixels;
+			byte[] pixels = null;
 			TextureDataFromStreamEXT(
 				stream,
 				out realWidth,
 				out realHeight,
-				out pixels,
+				ref pixels,
 				width,
 				height,
 				zoom
@@ -410,7 +410,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			Stream stream,
 			out int width,
 			out int height,
-			out byte[] pixels,
+			ref byte[] pixels,
 			int requestedWidth = -1,
 			int requestedHeight = -1,
 			bool zoom = false
@@ -419,12 +419,31 @@ namespace Microsoft.Xna.Framework.Graphics
 				stream,
 				out width,
 				out height,
-				out pixels,
+				ref pixels,
 				requestedWidth,
 				requestedHeight,
 				zoom
 			);
 		}
+
+        public static Texture2D FromStreamEXT(GraphicsDevice graphicsDevice, Stream stream, byte[] pixelsBuffer) {
+            if (stream.CanSeek && stream.Position == stream.Length) {
+                stream.Seek(0, SeekOrigin.Begin);
+            }
+
+            // Read the image data from the stream
+            int width, height;
+            TextureDataFromStreamEXT(stream, out width, out height, ref pixelsBuffer);
+
+            // Create the Texture2D from the raw pixel data
+            Texture2D result = new Texture2D(
+                graphicsDevice,
+                width,
+                height
+            );
+            result.SetData(pixelsBuffer);
+            return result;
+        }
 
 		// DDS loading extension, based on MojoDDS
 		public static Texture2D DDSFromStreamEXT(
