@@ -53,7 +53,7 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
 		#region OpenGL Texture Container Class
 
-		private class OpenGLTexture : IGLTexture
+	    internal class OpenGLTexture : IGLTexture
 		{
 			public uint Handle
 			{
@@ -427,7 +427,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private OpenGL Context Variable
 
-		private IntPtr glContext;
+		internal IntPtr glContext;
+        internal IntPtr glContextHDC;
 
 		#endregion
 
@@ -623,6 +624,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				realBackbufferFBO = 0;
 				realBackbufferRBO = 0;
 			}
+
+            glContextHDC = wmInfo.info.win.hdc;
 
 			// Init threaded GL crap where applicable
 			InitThreadedGL(

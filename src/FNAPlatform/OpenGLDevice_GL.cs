@@ -213,7 +213,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_DEBUG_SEVERITY_HIGH =		0x9146,
 			GL_DEBUG_SEVERITY_MEDIUM =		0x9147,
 			GL_DEBUG_SEVERITY_LOW =			0x9148,
-			GL_DEBUG_SEVERITY_NOTIFICATION =	0x826B
+			GL_DEBUG_SEVERITY_NOTIFICATION =	0x826B,
+
+             GL_SYNC_GPU_COMMANDS_COMPLETE = 0x9117
 		}
 
 		// Entry Points
@@ -517,12 +519,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		private GetTexImage glGetTexImage;
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
-		private delegate void TexParameteri(
+		internal delegate void TexParameteri(
 			GLenum target,
 			GLenum pname,
 			int param
 		);
-		private TexParameteri glTexParameteri;
+		internal TexParameteri glTexParameteri;
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
 		private delegate void TexParameterf(
@@ -1690,7 +1692,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			return Marshal.GetDelegateForFunctionPointer(addr, type);
 		}
 
-		private Delegate GetProcAddressEXT(string name, Type type, string ext = "EXT")
+		internal Delegate GetProcAddressEXT(string name, Type type, string ext = "EXT")
 		{
 			IntPtr addr = SDL.SDL_GL_GetProcAddress(name);
 			if (addr == IntPtr.Zero)

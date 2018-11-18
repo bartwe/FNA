@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Xna.Framework</RootNamespace>
     <AssemblyName>FNA</AssemblyName>
+    <NuGetPackageImportStamp>e07c210d</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
@@ -75,6 +76,10 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OpenCL.Net, Version=2.2.9.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -102,6 +107,13 @@
     <Compile Include="src\BoundingFrustum.cs" />
     <Compile Include="src\BoundingSphere.cs" />
     <Compile Include="src\Color.cs" />
+    <Compile Include="src\Compute\CommandQueue.cs" />
+    <Compile Include="src\Compute\ComputeBuffer.cs" />
+    <Compile Include="src\Compute\ComputeDevice.cs" />
+    <Compile Include="src\Compute\ComputeKernel.cs" />
+    <Compile Include="src\Compute\ComputeOpenClNativeMethods.cs" />
+    <Compile Include="src\Compute\InputOutput.cs" />
+    <Compile Include="src\Compute\WorkGroupSize.cs" />
     <Compile Include="src\ContainmentType.cs" />
     <Compile Include="src\Content\ContentExtensions.cs" />
     <Compile Include="src\Content\ContentLoadException.cs" />
@@ -407,6 +419,7 @@
     <None Include="FNA.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="src\Graphics\Effect\StockEffects\FXB\AlphaTestEffect.fxb">
@@ -431,4 +444,11 @@
       <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.YUVToRGBAEffect.fxb</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
+  </Target>
 </Project>
