@@ -24,5 +24,15 @@ namespace FNAExt.Compute {
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueReleaseGLObjects(IntPtr commandQueue, IntPtr numMemObjects, IntPtr memObjects, uint numEventsIntWaitList, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 8, ArraySubType = UnmanagedType.SysUInt), In] Event[] eventWaitList, [MarshalAs(UnmanagedType.Struct)] out Event e);
+
+        [DllImport("opencl.dll")]
+        internal static extern IntPtr clCreateBuffer(IntPtr context, MemFlags flags, IntPtr size, IntPtr hostPtr, [MarshalAs(UnmanagedType.I4)] out ErrorCode errcodeRet);
+
+        [DllImport("opencl.dll")]
+        internal static extern ErrorCode clEnqueueWriteBuffer(IntPtr commandQueue, IntPtr buffer, Bool blockingWrite, int offset, int count, IntPtr ptr, uint numEventsIntWaitList, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 8, ArraySubType = UnmanagedType.SysUInt), In] Event[] eventWaitList, [MarshalAs(UnmanagedType.Struct)] out Event e);
+
+        [DllImport("opencl.dll")]
+        internal static extern ErrorCode clEnqueueReadBuffer(IntPtr commandQueue, IntPtr buffer, Bool blockingRead, int offset, int count, IntPtr ptr, uint numEventsIntWaitList, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 8, ArraySubType = UnmanagedType.SysUInt), In] Event[] eventWaitList, [MarshalAs(UnmanagedType.Struct)] out Event e);
+
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using OpenCL.Net;
 
@@ -20,7 +19,7 @@ namespace FNAExt.Compute {
 
         ~ComputeKernel() {
             if (!_disposed)
-            Dispose(false);
+                Dispose(false);
         }
 
         public void Dispose() {
@@ -35,7 +34,7 @@ namespace FNAExt.Compute {
             _pinnedKernalArgValue.Dispose();
         }
 
-        public void SetArgument(uint index, ComputeBuffer buffer) {
+        public void SetArgument<T>(uint index, ComputeBuffer<T> buffer) where T : struct {
             _kernalArgValue[0] = buffer._image2DHandle;
             var errorCode = ComputeOpenClNativeMethods.clSetKernelArg(_kernelHandle, index, (IntPtr)IntPtr.Size, (IntPtr)_pinnedKernalArgValue);
             if (errorCode != ErrorCode.Success)

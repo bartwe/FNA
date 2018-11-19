@@ -4,21 +4,26 @@ using Microsoft.Xna.Framework.Graphics;
 using OpenCL.Net;
 
 namespace FNAExt.Compute {
-    public class ComputeBuffer : IDisposable {
-        internal IMem _image2D;
+    internal interface IComputeBuffer {
+        void MarkInactive();
+    }
+    public class ComputeBuffer<T> : IDisposable, IComputeBuffer where T : struct {
+        internal IMem _mem;
         internal IntPtr _image2DHandle;
         readonly InputOutput _flags;
         bool _disposed;
-        byte[] _data;
+        T[] _data;
         internal PinnedObject _pinnedData;
         internal int _width;
         internal int _height;
         bool _active;
         readonly int _elementSize;
+        public int _dimensions;
 
-        internal ComputeBuffer(IMem image2D, InputOutput flags, int width, int height, int elementSize, byte[] data, PinnedObject pinnedData) {
-            _image2D = image2D;
-            _image2DHandle = (IntPtr)image2D.GetType().GetField("_handle", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(_image2D);
+        internal ComputeBuffer(IMem mem, int dimensions, InputOutput flags, int width, int height, int elementSize, T[] data, PinnedObject pinnedData) {
+            _mem = mem;
+            _dimensions = dimensions;
+            _image2DHandle = (IntPtr)mem.GetType().GetField("_handle", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(_mem);
             _flags = flags;
             _width = width;
             _height = height;
@@ -41,8 +46,8 @@ namespace FNAExt.Compute {
             if (_disposed)
                 return;
             _disposed = true;
-            Cl.ReleaseMemObject(_image2D);
-            _image2D = null;
+            Cl.ReleaseMemObject(_mem);
+            _mem = null;
             _data = null;
             if (_flags != InputOutput.Texture) {
                 _pinnedData.Dispose();
@@ -76,13 +81,13 @@ namespace FNAExt.Compute {
             _active = true;
         }
 
-        internal void MarkInactive() {
+        void IComputeBuffer.MarkInactive() {
             if (!_active)
                 throw new Exception();
             _active = false;
         }
 
-        public void Read(byte[] buffer, int bufferOffset, int offset, int length) {
+        public void Read(T[] buffer, int bufferOffset, int offset, int length) {
             if (_active)
                 throw new Exception();
             if (_flags != InputOutput.ReceiveFromCompute)
@@ -90,7 +95,7 @@ namespace FNAExt.Compute {
             Array.Copy(_data, offset, buffer, bufferOffset, length);
         }
 
-        public void Write(byte[] buffer, int bufferOffset, int offset, int length) {
+        public void Write(T[] buffer, int bufferOffset, int offset, int length) {
             if (_active)
                 throw new Exception();
             if (_flags != InputOutput.SendToCompute)
@@ -98,15 +103,14 @@ namespace FNAExt.Compute {
             Array.Copy(buffer, bufferOffset, _data, offset, length);
         }
 
-        public unsafe void CopyToTexture(Texture2D texture) {
+        public void CopyToTexture(Texture2D texture) {
             if (_active)
                 throw new Exception();
             if (_flags != InputOutput.ReceiveFromCompute)
                 throw new Exception();
             if ((texture.Width != _width) || (texture.Height != _height))
                 throw new Exception();
-            fixed (byte* p = _data)
-                texture.SetDataPointerEXT(0, null, (IntPtr)p, _width * _height * _elementSize);
+            texture.SetDataPointerEXT(0, null, _pinnedData, _width * _height * _elementSize);
         }
     }
 }

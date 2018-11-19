@@ -151,7 +151,38 @@ namespace FNAExt.Compute {
             return new ComputeKernel(kernel);
         }
 
-        public ComputeBuffer CreateBuffer2D(int width, int height, InputOutput inputOutput, byte[] data = null) {
+        public ComputeBuffer<T> CreateBuffer<T>(int length, InputOutput inputOutput, T[] data = null) where T : struct {
+            if (data != null) {
+                if (data.Length < length)
+                    throw new ArgumentOutOfRangeException("data");
+            }
+            else
+                data = new T[length];
+            var pinnedData = data.Pin();
+            ErrorCode errorCode;
+            var flags = MemFlags.CopyHostPtr;
+            switch (inputOutput) {
+                case InputOutput.ReceiveFromCompute:
+                    flags |= MemFlags.WriteOnly;
+                    break;
+                case InputOutput.SendToCompute:
+                    flags |= MemFlags.ReadOnly;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("inputOutput");
+            }
+            var memHandle = ComputeOpenClNativeMethods.clCreateBuffer(_contextHandle, flags, (IntPtr)(length * TypeSize<T>.SizeInt), pinnedData, out errorCode);
+            if (errorCode != ErrorCode.Success)
+                throw new Cl.Exception(errorCode, "CreateBuffer");
+            var mem = new Mem();
+            var boxedMem = (object)mem;
+            typeof(Mem).GetField("_handle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(boxedMem, memHandle);
+            mem = (Mem)boxedMem;
+
+            return new ComputeBuffer<T>(mem, 1, inputOutput, length, 1, TypeSize<T>.SizeInt, data, pinnedData);
+        }
+
+        public ComputeBuffer<T> CreateBuffer2D<T>(int width, int height, InputOutput inputOutput, T[] data = null) where T : struct {
             var clImageFormat = new ImageFormat(ChannelOrder.RGBA, ChannelType.Unsigned_Int8);
             var elementSize = SizeOfElement(clImageFormat);
             var length = width * height * elementSize;
@@ -160,7 +191,7 @@ namespace FNAExt.Compute {
                     throw new ArgumentOutOfRangeException("data");
             }
             else
-                data = new byte[length];
+                data = new T[length];
             var pinnedData = data.Pin();
             ErrorCode errorCode;
             var flags = MemFlags.CopyHostPtr;
@@ -177,11 +208,10 @@ namespace FNAExt.Compute {
             var image2D = Cl.CreateImage2D(_context, flags, clImageFormat, (IntPtr)width, (IntPtr)height, (IntPtr)0, pinnedData, out errorCode);
             if (errorCode != ErrorCode.Success)
                 throw new Cl.Exception(errorCode, "CreateImage2D");
-            return new ComputeBuffer(image2D, inputOutput, width, height,elementSize, data, pinnedData);
+            return new ComputeBuffer<T>(image2D, 2, inputOutput, width, height, elementSize, data, pinnedData);
         }
 
-
-        public ComputeBuffer CreateBuffer2D(GraphicsDevice graphicsDevice, Texture2D texture) {
+        public ComputeBuffer<T> CreateBuffer2D<T>(GraphicsDevice graphicsDevice, Texture2D texture) where T : struct {
             ErrorCode errorCode;
             var flags = MemFlags.WriteOnly;
 
@@ -199,7 +229,7 @@ namespace FNAExt.Compute {
             var boxedMem = (object)mem;
             typeof(Mem).GetField("_handle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(boxedMem, memHandle);
             mem = (Mem)boxedMem;
-            return new ComputeBuffer(mem, InputOutput.Texture, texture.Width, texture.Height, 4, null, new PinnedObject());
+            return new ComputeBuffer<T>(mem, 2, InputOutput.Texture, texture.Width, texture.Height, TypeSize<T>.SizeInt, null, new PinnedObject());
         }
 
         int SizeOfElement(ImageFormat clImageFormat) {

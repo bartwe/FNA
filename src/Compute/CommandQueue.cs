@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.Xna.Framework.Graphics;
 using OpenCL.Net;
 using EventInfo = OpenCL.Net.EventInfo;
 
@@ -21,7 +20,7 @@ namespace FNAExt.Compute {
         InfoBuffer _infoBuffer;
         bool _disposed;
         const int InfoBufferCapacity = 256;
-        readonly Queue<ComputeBuffer> _acitveBuffers = new Queue<ComputeBuffer>();
+        readonly Queue<IComputeBuffer> _acitveBuffers = new Queue<IComputeBuffer>();
         readonly ComputeDevice _device;
 
         internal CommandQueue(OpenCL.Net.CommandQueue queue, ComputeDevice device) {
@@ -41,27 +40,41 @@ namespace FNAExt.Compute {
             _localWorkSizePtr[2] = (IntPtr)8;
         }
 
-        public void EnqueueSendToCompute(ComputeBuffer buffer) {
+        public void EnqueueSendToCompute<T>(ComputeBuffer<T> buffer) where T : struct {
             buffer.EnsureCanSend();
-            _originPtr[0] = IntPtr.Zero;
-            _originPtr[1] = IntPtr.Zero;
-            _originPtr[2] = IntPtr.Zero;
-            _regionPtr[0] = (IntPtr)buffer._width;
-            _regionPtr[1] = (IntPtr)buffer._height;
-            _regionPtr[2] = (IntPtr)1;
-            Event clevent;
-            _eventScratch[0] = _mostRecentEvent;
-            var hasPreviousEvent = _events.Count > 0;
-            var errorCode = ComputeOpenClNativeMethods.clEnqueueWriteImage(_queueHandle, buffer._image2DHandle, Bool.False, _originPtr, _regionPtr, (IntPtr)0, (IntPtr)0, buffer._pinnedData, hasPreviousEvent ? 1u : 0, hasPreviousEvent ? _eventScratch : null, out clevent);
-            if (errorCode != ErrorCode.Success)
-                throw new Cl.Exception(errorCode, "EnqueueWriteImage");
+            if (buffer._dimensions == 1) {
+                Event clevent;
+                _eventScratch[0] = _mostRecentEvent;
+                var hasPreviousEvent = _events.Count > 0;
+                var errorCode = ComputeOpenClNativeMethods.clEnqueueWriteBuffer(_queueHandle, buffer._image2DHandle, Bool.False, 0, buffer._width, buffer._pinnedData, hasPreviousEvent ? 1u : 0, hasPreviousEvent ? _eventScratch : null, out clevent);
+                if (errorCode != ErrorCode.Success)
+                    throw new Cl.Exception(errorCode, "EnqueueWriteImage");
+                _events.Enqueue(clevent);
+                _mostRecentEvent = clevent;
+            }
+            else if (buffer._dimensions == 2) {
+                _originPtr[0] = IntPtr.Zero;
+                _originPtr[1] = IntPtr.Zero;
+                _originPtr[2] = IntPtr.Zero;
+                _regionPtr[0] = (IntPtr)buffer._width;
+                _regionPtr[1] = (IntPtr)buffer._height;
+                _regionPtr[2] = (IntPtr)1;
+                Event clevent;
+                _eventScratch[0] = _mostRecentEvent;
+                var hasPreviousEvent = _events.Count > 0;
+                var errorCode = ComputeOpenClNativeMethods.clEnqueueWriteImage(_queueHandle, buffer._image2DHandle, Bool.False, _originPtr, _regionPtr, (IntPtr)0, (IntPtr)0, buffer._pinnedData, hasPreviousEvent ? 1u : 0, hasPreviousEvent ? _eventScratch : null, out clevent);
+                if (errorCode != ErrorCode.Success)
+                    throw new Cl.Exception(errorCode, "EnqueueWriteImage");
+                _events.Enqueue(clevent);
+                _mostRecentEvent = clevent;
+            }
+            else
+                throw new Exception();
             buffer.MarkActive();
             _acitveBuffers.Enqueue(buffer);
-            _events.Enqueue(clevent);
-            _mostRecentEvent = clevent;
         }
 
-        public void EnqueueReceiveFromCompute(ComputeBuffer buffer) {
+        public void EnqueueReceiveFromCompute<T>(ComputeBuffer<T> buffer) where T : struct {
             buffer.EnsureCanReceive();
             _originPtr[0] = IntPtr.Zero;
             _originPtr[1] = IntPtr.Zero;
@@ -81,7 +94,7 @@ namespace FNAExt.Compute {
             _mostRecentEvent = clevent;
         }
 
-        public unsafe void EnqueueAcquireGlResource(ComputeBuffer buffer) {
+        public unsafe void EnqueueAcquireGlResource<T>(ComputeBuffer<T> buffer) where T : struct {
             buffer.EnsureGLResource();
             Event clevent;
             _pointerScratch[0] = buffer._image2DHandle;
@@ -98,13 +111,13 @@ namespace FNAExt.Compute {
             _mostRecentEvent = clevent;
         }
 
-        public unsafe void EnqueueReleaseGlResource(ComputeBuffer buffer) {
+        public unsafe void EnqueueReleaseGlResource<T>(ComputeBuffer<T> buffer) where T : struct {
             Event clevent;
             _pointerScratch[0] = buffer._image2DHandle;
             _eventScratch[0] = _mostRecentEvent;
             var hasPreviousEvent = _events.Count > 0;
             fixed (IntPtr* p = _pointerScratch) {
-                var errorCode = ComputeOpenClNativeMethods.clEnqueueReleaseGLObjects(_queueHandle, (IntPtr)1, (IntPtr)p, hasPreviousEvent ? 1u : 0, hasPreviousEvent?_eventScratch:null, out clevent);
+                var errorCode = ComputeOpenClNativeMethods.clEnqueueReleaseGLObjects(_queueHandle, (IntPtr)1, (IntPtr)p, hasPreviousEvent ? 1u : 0, hasPreviousEvent ? _eventScratch : null, out clevent);
                 if (errorCode != ErrorCode.Success)
                     throw new Cl.Exception(errorCode, "clEnqueueAcquireGLObjects");
             }
