@@ -663,6 +663,8 @@ namespace Microsoft.Xna.Framework.Graphics
         static uint prevMessageId;
         static GLenum prevMessageSeverity;
         static int prevMessageLength; //cludge
+        static int messageCount;
+        const int DebugCallbackMessageLimit = 20;
 
 		private static void DebugCallback(
 			GLenum source,
@@ -673,7 +675,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr message, // const GLchar*
 			IntPtr userParam // const GLvoid*
 		) {
-            if ((prevMessageSource == source)&&(prevMessageType == type)&&(prevMessageId==id)&&(prevMessageSeverity == severity)&&(prevMessageLength == length))
+            if (messageCount >= DebugCallbackMessageLimit)
+                return;
+            if ((prevMessageSource == source) && (prevMessageType == type) && (prevMessageId == id) && (prevMessageSeverity == severity) && (prevMessageLength == length))
                 return; // duplicate message suppressed
             prevMessageSource = source;
             prevMessageType = type;
@@ -697,7 +701,23 @@ namespace Microsoft.Xna.Framework.Graphics
 		        }
 		    }
 
-			string err = (
+            messageCount++;
+            if (messageCount == DebugCallbackMessageLimit) {
+                This.glDebugMessageControlARB(
+                    GLenum.GL_DONT_CARE,
+                    GLenum.GL_DONT_CARE,
+                    GLenum.GL_DONT_CARE,
+                    0,
+                    IntPtr.Zero,
+                    false
+                );
+                FNALoggerEXT.LogError("Too many opengl debug callbacks, disabling.");
+
+                if (Debugger.IsAttached)
+                    throw new InvalidOperationException("Too many opengl messages.");
+            } 
+            
+            string err = (
 				Marshal.PtrToStringAnsi(message) +
 				"\n\tSource: " +
 				source.ToString() +
@@ -1310,7 +1330,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					IntPtr.Zero,
 					false
 				);
-				glDebugMessageControlARB(
+                glDebugMessageControlARB(
 					GLenum.GL_DONT_CARE,
 					GLenum.GL_DEBUG_TYPE_OTHER_ARB,
 					GLenum.GL_DEBUG_SEVERITY_NOTIFICATION_ARB,
