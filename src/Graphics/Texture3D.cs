@@ -53,27 +53,27 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new ArgumentNullException("graphicsDevice");
 			}
 
-			GraphicsDevice = graphicsDevice;
 			Width = width;
 			Height = height;
 			Depth = depth;
 			LevelCount = mipMap ? CalculateMipLevels(width, height) : 1;
 			Format = format;
 
-			texture = GraphicsDevice.GLDevice.CreateTexture3D(
+			texture = graphicsDevice.GLDevice.CreateTexture3D(
 				Format,
 				Width,
 				Height,
 				Depth,
 				LevelCount
 			);
-		}
+            GraphicsDevice = graphicsDevice;
+        }
 
-		#endregion
+        #endregion
 
-		#region Public SetData Methods
+        #region Public SetData Methods
 
-		public void SetData<T>(T[] data) where T : struct
+        public void SetData<T>(T[] data) where T : struct
 		{
 			SetData<T>(
 				data,

@@ -675,88 +675,92 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr message, // const GLchar*
 			IntPtr userParam // const GLvoid*
 		) {
-            if (messageCount >= DebugCallbackMessageLimit)
-                return;
-            if ((prevMessageSource == source) && (prevMessageType == type) && (prevMessageId == id) && (prevMessageSeverity == severity) && (prevMessageLength == length))
-                return; // duplicate message suppressed
-            prevMessageSource = source;
-            prevMessageType = type;
-            prevMessageId=id;
-            prevMessageSeverity = severity;
-            prevMessageLength = length;
+            try {
+                if (messageCount >= DebugCallbackMessageLimit)
+                    return;
+                if ((prevMessageSource == source) && (prevMessageType == type) && (prevMessageId == id) && (prevMessageSeverity == severity) && (prevMessageLength == length))
+                    return; // duplicate message suppressed
+                prevMessageSource = source;
+                prevMessageType = type;
+                prevMessageId = id;
+                prevMessageSeverity = severity;
+                prevMessageLength = length;
 
-            bool xsplitSuppression = false;
-		    if (XSplit_GL_SwapWindow_WorkaroundFlag) {
-		        if ((id == 0x502) && (source == GLenum.GL_DEBUG_SOURCE_API_ARB) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
-		            && (severity == GLenum.GL_DEBUG_SEVERITY_HIGH_ARB)) {
-		            //GL_INVALID_OPERATION error generated. Render buffer not bound.
-		            // We get this debug callback on every frame swap when xsplit is hooked into the game, suppress.
-                    if (XSplit_GL_SwapWindow_WarnOnce) {
-                        XSplit_GL_SwapWindow_WarnOnce = false;
+                bool xsplitSuppression = false;
+                if (XSplit_GL_SwapWindow_WorkaroundFlag) {
+                    if ((id == 0x502) && (source == GLenum.GL_DEBUG_SOURCE_API_ARB) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)
+                        && (severity == GLenum.GL_DEBUG_SEVERITY_HIGH_ARB)) {
+                        //GL_INVALID_OPERATION error generated. Render buffer not bound.
+                        // We get this debug callback on every frame swap when xsplit is hooked into the game, suppress.
+                        if (XSplit_GL_SwapWindow_WarnOnce) {
+                            XSplit_GL_SwapWindow_WarnOnce = false;
+                        }
+                        else
+                            return;
+                        FNALoggerEXT.LogWarn("XSplit GL_SwapWindow GL_INVALID_OPERATION workaround enabled.");
+                        xsplitSuppression = true;
+                    }
+                }
+
+                messageCount++;
+                if (messageCount == DebugCallbackMessageLimit) {
+                    This.glDebugMessageControlARB(
+                        GLenum.GL_DONT_CARE,
+                        GLenum.GL_DONT_CARE,
+                        GLenum.GL_DONT_CARE,
+                        0,
+                        IntPtr.Zero,
+                        false
+                    );
+                    FNALoggerEXT.LogError("Too many opengl debug callbacks, disabling.");
+
+                    if (Debugger.IsAttached)
+                        throw new InvalidOperationException("Too many opengl messages.");
+                }
+
+                string err = (
+                    Marshal.PtrToStringAnsi(message) +
+                    "\n\tSource: " +
+                    source.ToString() +
+                    "\n\tType: " +
+                    type.ToString() +
+                    "\n\tId: 0x" +
+                    id.ToString("X") +
+                    "\n\tSeverity: " +
+                    severity.ToString()
+                );
+
+                if ((!xsplitSuppression) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB)) {
+                    if (err.Contains("GL_INVALID_OPERATION") && err.Contains(" SAMPLES "))
+                        This.MultiSampleFailed = true;
+
+                    var logStack = false;
+
+                    if (debugSyncState == DebugSyncState.Async) {
+                        This.glEnable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+                        debugSyncState = DebugSyncState.Sync;
                     }
                     else
-		                return;
-                    FNALoggerEXT.LogWarn("XSplit GL_SwapWindow GL_INVALID_OPERATION workaround enabled.");
-                    xsplitSuppression = true;
-		        }
-		    }
+                    if (debugSyncState == DebugSyncState.Sync) {
+                        This.glDisable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+                        debugSyncState = DebugSyncState.Disabled;
+                        logStack = true;
+                    }
 
-            messageCount++;
-            if (messageCount == DebugCallbackMessageLimit) {
-                This.glDebugMessageControlARB(
-                    GLenum.GL_DONT_CARE,
-                    GLenum.GL_DONT_CARE,
-                    GLenum.GL_DONT_CARE,
-                    0,
-                    IntPtr.Zero,
-                    false
-                );
-                FNALoggerEXT.LogError("Too many opengl debug callbacks, disabling.");
+                    if (logStack)
+                        err += "\n" + Environment.StackTrace;
 
-                if (Debugger.IsAttached)
-                    throw new InvalidOperationException("Too many opengl messages.");
-            } 
-            
-            string err = (
-				Marshal.PtrToStringAnsi(message) +
-				"\n\tSource: " +
-				source.ToString() +
-				"\n\tType: " +
-				type.ToString() +
-				"\n\tId: 0x" +
-				id.ToString("X") +
-				"\n\tSeverity: " +
-				severity.ToString()
-			);
+                    FNALoggerEXT.LogError(err);
 
-			if ((!xsplitSuppression) && (type == GLenum.GL_DEBUG_TYPE_ERROR_ARB))
-			{
-				if (err.Contains("GL_INVALID_OPERATION") && err.Contains(" SAMPLES "))
-					This.MultiSampleFailed = true;
-
-				var logStack = false;
-
-				if (debugSyncState == DebugSyncState.Async) {
-					This.glEnable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-					debugSyncState = DebugSyncState.Sync;
-				}
-				else 
-				if (debugSyncState == DebugSyncState.Sync) {
-					This.glDisable(GLenum.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-					debugSyncState = DebugSyncState.Disabled;
-					logStack = true;
-				}
-
-				if (logStack)
-					err += "\n" + Environment.StackTrace;
-
-				FNALoggerEXT.LogError(err);
-
-                //if (Debugger.IsAttached)
-				//    throw new InvalidOperationException("ARB_debug_output found an error: " + err);
-			}
-            else
-			    FNALoggerEXT.LogWarn(err);
+                    //if (Debugger.IsAttached)
+                    //    throw new InvalidOperationException("ARB_debug_output found an error: " + err);
+                }
+                else
+                    FNALoggerEXT.LogWarn(err);
+            }
+            catch (Exception e) {
+                FNALoggerEXT.LogError(e.ToString());
+            }
 		}
 
 		/* END DEBUG OUTPUT FUNCTIONS */

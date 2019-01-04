@@ -68,7 +68,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new ArgumentNullException("graphicsDevice");
 			}
 
-			GraphicsDevice = graphicsDevice;
 			Width = width;
 			Height = height;
 			LevelCount = mipMap ? CalculateMipLevels(width, height) : 1;
@@ -86,13 +85,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				Format = format;
 			}
 
-			texture = GraphicsDevice.GLDevice.CreateTexture2D(
+			texture = graphicsDevice.GLDevice.CreateTexture2D(
 				Format,
 				Width,
 				Height,
 				LevelCount
 			);
-		}
+            GraphicsDevice = graphicsDevice;
+        }
 
 		#endregion
 
