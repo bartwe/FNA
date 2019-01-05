@@ -146,16 +146,16 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Update()
 		{
-#if DEBUG
+#if VERBOSE_AL_DEBUGGING
 			CheckALError();
 #endif
-		}
+        }
 
-		#endregion
+        #endregion
 
-		#region Public Listener Methods
+        #region Public Listener Methods
 
-		public void SetMasterVolume(float volume)
+        public void SetMasterVolume(float volume)
 		{
 			/* FIXME: How to ignore listener for individual sources? -flibit
 			 * AL10.alListenerf(AL10.AL_GAIN, volume);
@@ -698,8 +698,6 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 #if VERBOSE_AL_DEBUGGING
 			CheckALError();
-#endif
-#if DEBUG
 			// Error check our queuedBuffers list.
 			ALBuffer[] sync = errorCheck.ToArray();
 			for (int i = 0; i < buffersToDequeue; i += 1)

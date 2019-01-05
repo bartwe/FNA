@@ -318,11 +318,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		 * performance warnings on Intel/Mesa.
 		 * -sulix
 		 */
-#if DEBUG
-		private static Vector4 DiscardColor = new Color(68, 34, 136, 255).ToVector4();
-#else
+//#if DEBUG
+//		private static Vector4 DiscardColor = new Color(68, 34, 136, 255).ToVector4();
+//#else
 		private static Vector4 DiscardColor = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
-#endif
+//#endif
 
 		#endregion
 
