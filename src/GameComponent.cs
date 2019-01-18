@@ -87,23 +87,24 @@ namespace Microsoft.Xna.Framework
 			this.Game = game;
 		}
 
-		#endregion
+        #endregion
 
-		#region Deconstructor
+        #region Deconstructor
 
-		~GameComponent()
+#if XNADESTRUCTOR
+        ~GameComponent()
 		{
 			Dispose(false);
 		}
+#endif
+#endregion
 
-		#endregion
+        #region Public Dispose Method
 
-		#region Public Dispose Method
-
-		/// <summary>
-		/// Shuts down the component.
-		/// </summary>
-		public void Dispose()
+        /// <summary>
+        /// Shuts down the component.
+        /// </summary>
+        public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);

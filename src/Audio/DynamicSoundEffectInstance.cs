@@ -78,20 +78,22 @@ namespace Microsoft.Xna.Framework.Audio
 			availableBuffers = new Queue<ALBuffer>();
 		}
 
-		#endregion
+        #endregion
 
-		#region Destructor
+        #region Destructor
 
-		~DynamicSoundEffectInstance()
+#if XNADESTRUCTOR
+        ~DynamicSoundEffectInstance()
 		{
 			Dispose();
 		}
+#endif
 
-		#endregion
+        #endregion
 
-		#region Public Dispose Method
+        #region Public Dispose Method
 
-		public override void Dispose()
+        public override void Dispose()
 		{
 			if (!IsDisposed)
 			{

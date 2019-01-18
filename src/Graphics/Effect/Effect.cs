@@ -1130,7 +1130,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						IntPtr curOffset = IntPtr.Zero;
 						for (int j = 0; j < param.value.type.member_count; j += 1)
 						{
-							memList.Add(new EffectParameter(
+                            memList.Add(new EffectParameter(
 								Marshal.PtrToStringAnsi(mem[j].name),
 								null,
 								(int) mem[j].info.rows,
@@ -1195,7 +1195,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					));
 				}
 
-				techniques.Add(new EffectTechnique(
+                techniques.Add(new EffectTechnique(
 					Marshal.PtrToStringAnsi(tech.name),
 					(IntPtr) (techPtr + i),
 					new EffectPassCollection(passes),

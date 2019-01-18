@@ -184,20 +184,20 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 		}
 
-		#endregion
+        #endregion
 
-		#region Destructor
-/*
-		~SoundEffect()
+        #region Destructor
+#if XNADESTRUCTOR
+        ~SoundEffect()
 		{
 			Dispose();
 		}
-*/
-		#endregion
+#endif
+#endregion
 
-		#region Public Dispose Method
+        #region Public Dispose Method
 
-		public void Dispose()
+        public void Dispose()
 		{
 			if (!IsDisposed)
 			{
