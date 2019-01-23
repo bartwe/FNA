@@ -41,6 +41,7 @@
 #region Using Statements
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -574,7 +575,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				"FNA_OPENGL_BACKBUFFER_SCALE_NEAREST"
 			) == "1" ? GLenum.GL_NEAREST : GLenum.GL_LINEAR;
 
-			FNALoggerEXT.LogInfo("MojoShader Profile: " + shaderProfile);
+            FNALoggerEXT.LogInfo("MojoShader Profile: " + shaderProfile);
 
 			// Load the extension list, initialize extension-dependent components
 			string extensions;
@@ -1745,10 +1746,79 @@ namespace Microsoft.Xna.Framework.Graphics
 			});
 #endif
 
-			return new OpenGLEffect(effect, glEffect);
+#if FNA_SHADER_DUMP
+            unsafe {
+                MOJOSHADER_glEffect* effectDebug = (MOJOSHADER_glEffect*)glEffect;
+
+                FNALoggerEXT.LogError("Number of shaders: " + effectDebug->num_shaders);
+                for (int i = 0; i < effectDebug->num_shaders; ++i) {
+                    var pd = effectDebug->shaders[i].parseData;
+                    var name = Marshal.PtrToStringAnsi((IntPtr)(pd->mainfn));
+                    var profile = Marshal.PtrToStringAnsi((IntPtr)(pd->profile));
+                    var shader = Marshal.PtrToStringAnsi((IntPtr)(pd->output));
+                    File.WriteAllText("Shader_" + name + ".glsl", shader);
+                    FNALoggerEXT.LogError("Shader "+i+": "+ shader);
+              }
+            }
+#endif
+
+            return new OpenGLEffect(effect, glEffect);
 		}
 
-		private void DeleteEffect(IGLEffect effect)
+#if FNA_SHADER_DUMP
+        unsafe struct MOJOSHADER_glEffect {
+            IntPtr* effect;
+         public   int num_shaders;
+            public MOJOSHADER_glShader* shaders;
+            int* shader_indices;
+            int num_preshaders;
+            int* preshader_indices;
+            MOJOSHADER_glShader* current_vert;
+            MOJOSHADER_glShader* current_frag;
+            IntPtr* current_vert_raw;
+            IntPtr* current_frag_raw;
+            IntPtr* prev_program;
+        };
+
+        unsafe struct MOJOSHADER_glShader {
+            public MOJOSHADER_parseData* parseData;
+            UInt32 handle;
+            UInt32 refcount;
+        };
+
+       unsafe struct MOJOSHADER_parseData {
+            int error_count;
+            IntPtr* errors;
+            public char* profile;
+            public char* output;
+            int output_len;
+            int instruction_count;
+            IntPtr shader_type;
+            int major_ver;
+            int minor_ver;
+            public char* mainfn;
+            int uniform_count;
+            IntPtr* uniforms;
+            int constant_count;
+            IntPtr* constants;
+            int sampler_count;
+            IntPtr* samplers;
+            int attribute_count;
+            IntPtr* attributes;
+            int output_count;
+            IntPtr* outputs;
+            int swizzle_count;
+            IntPtr* swizzles;
+            int symbol_count;
+            IntPtr* symbols;
+            IntPtr* preshader;
+            IntPtr malloc;
+            IntPtr free;
+            IntPtr* malloc_data;
+        };
+#endif
+
+        private void DeleteEffect(IGLEffect effect)
 		{
 			IntPtr glEffectData = (effect as OpenGLEffect).GLEffectData;
 			if (glEffectData == currentEffect)
