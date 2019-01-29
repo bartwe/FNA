@@ -9,39 +9,60 @@
 
 #region Using Statements
 using System;
+using System.Runtime.CompilerServices;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics.PackedVector
 {
-	/// <summary>
-	/// Packed vector type containing four 8-bit unsigned integer values, ranging from 0 to 255.
-	/// </summary>
-	public struct Byte4 : IPackedVector<uint>, IEquatable<Byte4>, IPackedVector
-	{
-		#region Public Properties
+    /// <summary>
+    /// Packed vector type containing four 8-bit unsigned integer values, ranging from 0 to 255.
+    /// </summary>
+    public struct Byte4 : IPackedVector<uint>, IEquatable<Byte4>, IPackedVector {
+        #region Public Properties
 
-		/// <summary>
-		/// Directly gets or sets the packed representation of the value.
-		/// </summary>
-		/// <value>The packed representation of the value.</value>
-		uint IPackedVector<uint>.PackedValue
-		{
-			get
-			{
-				return PackedValue;
-			}
-			set
-			{
-				PackedValue = value;
-			}
-		}
+        /// <summary>
+        /// Directly gets or sets the packed representation of the value.
+        /// </summary>
+        /// <value>The packed representation of the value.</value>
+        uint IPackedVector<uint>.PackedValue {
+            get {
+                return PackedValue;
+            }
+            set {
+                PackedValue = value;
+            }
+        }
 
-		#endregion
+        public int X {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)(PackedValue & 0xFF); }
+        }
 
-		#region Private Variables
+
+        public int Y {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)((PackedValue >> 8) & 0xFF); }
+        }
+
+        public int Z {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)((PackedValue >> 16) & 0xFF); }
+        }
+
+        public int W {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)((PackedValue >> 24)); }
+        }
+        #endregion
+
+        #region Private Variables
 
         // bartwe: hacked for moar speeds
-		public uint PackedValue;
+        public uint PackedValue;
 
 		#endregion
 
