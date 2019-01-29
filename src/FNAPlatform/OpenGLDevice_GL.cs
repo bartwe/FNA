@@ -622,7 +622,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* END 3.2 CORE PROFILE FUNCTIONS */
 
-#if DEBUG
+#if !DISABLE_XSPLIT_WORKAROUND
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
 
 		private delegate void DebugMessageCallback(
@@ -1300,9 +1300,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 			}
 
-#if DEBUG
-			/* ARB_debug_output, for debug contexts */
-			IntPtr messageCallback = SDL.SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
+#if !DISABLE_XSPLIT_WORKAROUND
+            /* ARB_debug_output, for debug contexts */
+            IntPtr messageCallback = SDL.SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
             IntPtr messageControl = SDL.SDL_GL_GetProcAddress("glDebugMessageControlARB");
 			if (messageCallback == IntPtr.Zero || messageControl == IntPtr.Zero)
 			{
