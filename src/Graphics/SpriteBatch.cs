@@ -1157,7 +1157,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				0,
 				numSprites,
 				VertexPositionColorTexture4.RealStride,
-				SetDataOptions.None
+				SetDataOptions.Discard
 			);
 
 			curTexture = textureInfo[0];
