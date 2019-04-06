@@ -734,6 +734,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     if (err.Contains("GL_INVALID_OPERATION") && err.Contains(" SAMPLES "))
                         This.MultiSampleFailed = true;
 
+                    /*
                     var logStack = false;
 
                     if (debugSyncState == DebugSyncState.Async) {
@@ -749,7 +750,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                     if (logStack)
                         err += "\n" + Environment.StackTrace;
-
+                    */
                     FNALoggerEXT.LogError(err);
 
                     //if (Debugger.IsAttached)

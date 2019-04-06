@@ -2466,11 +2466,13 @@ namespace Microsoft.Xna.Framework
 					return retVal;
 				}
 			}
+/*
 			FNALoggerEXT.LogWarn(
 				"KEY/SCANCODE MISSING FROM SDL2->XNA DICTIONARY: " +
 				key.sym.ToString() + " " +
 				key.scancode.ToString()
 			);
+ */
 			return Keys.None;
 		}
 
