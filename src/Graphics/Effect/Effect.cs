@@ -1025,17 +1025,17 @@ namespace Microsoft.Xna.Framework.Graphics
 							}
 							else
 							{
-								throw new NotImplementedException("Unhandled mipfilter type!");
+								throw new NotImplementedException("Unhandled mipfilter type! " + mipFilter);
 							}
 						}
 						else
 						{
-							throw new NotImplementedException("Unhandled minfilter type!");
+							throw new NotImplementedException("Unhandled minfilter type! " + minFilter);
 						}
 					}
 					else
 					{
-						throw new NotImplementedException("Unhandled magfilter type!");
+						throw new NotImplementedException("Unhandled magfilter type! " + magFilter);
 					}
 					samplerChanged = true;
 				}
