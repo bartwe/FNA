@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 #endregion
 
@@ -282,7 +283,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		 * want to prevent a resource from being collected by holding a
 		 * strong reference to it in this list.
 		 */
-		private readonly List<WeakReference> resources = new List<WeakReference>();
+		private readonly HashSet<GraphicsResource> resources = new HashSet<GraphicsResource>();
 		private readonly object resourcesLock = new object();
 
 		#endregion
@@ -487,13 +488,9 @@ namespace Microsoft.Xna.Framework.Graphics
 					 */
 					lock (resourcesLock)
 					{
-						foreach (WeakReference resource in resources.ToArray())
+						foreach (GraphicsResource resource in resources.ToArray())
 						{
-							object target = resource.Target;
-							if (target != null)
-							{
-								(target as IDisposable).Dispose();
-							}
+							resource.Dispose();
 						}
 						resources.Clear();
 					}
@@ -525,7 +522,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Resource Management Methods
 
-		internal void AddResourceReference(WeakReference resourceReference)
+        internal void AddResourceReference(GraphicsResource resourceReference)
 		{
 			lock (resourcesLock)
 			{
@@ -533,7 +530,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		internal void RemoveResourceReference(WeakReference resourceReference)
+        internal void RemoveResourceReference(GraphicsResource resourceReference)
 		{
 			lock (resourcesLock)
 			{
@@ -572,8 +569,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					GLDevice,
 					ref src,
 					ref dst,
-					overrideWindowHandle
-				);
+				overrideWindowHandle
+			);
 			}
 			else if (sourceRectangle.HasValue)
 			{
@@ -587,6 +584,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			else if (destinationRectangle.HasValue)
 			{
+
 				Rectangle dst = destinationRectangle.Value;
 				FNA3D.FNA3D_SwapBuffers(
 					GLDevice,

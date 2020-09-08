@@ -6,3 +6,5 @@ obj_core/
 *.userprefs
 *.suo
 *.vs
+
+/lib/SDL2/

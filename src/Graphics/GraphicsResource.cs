@@ -36,16 +36,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				 * lifetime. But only one GraphicsDevice should
 				 * retain ownership.
 				 */
-				if (graphicsDevice != null && selfReference != null)
+				if (graphicsDevice != null)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
-					selfReference = null;
+					graphicsDevice.RemoveResourceReference(this);
 				}
 
 				graphicsDevice = value;
 
-				selfReference = new WeakReference(this);
-				graphicsDevice.AddResourceReference(selfReference);
+				graphicsDevice.AddResourceReference(this);
 			}
 		}
 
@@ -71,8 +69,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private WeakReference selfReference;
-
 		private GraphicsDevice graphicsDevice;
 
 		#endregion
@@ -87,11 +83,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		internal GraphicsResource()
 		{
-		}
-
-		~GraphicsResource()
-		{
-			// FIXME: We really should call Dispose() here! -flibit
 		}
 
 		#endregion
@@ -154,12 +145,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 
 				// Remove from the list of graphics resources
-				if (graphicsDevice != null && selfReference != null)
+				if (graphicsDevice != null)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
-					selfReference = null;
+					graphicsDevice.RemoveResourceReference(this);
 				}
 
+				graphicsDevice = null;
 				IsDisposed = true;
 			}
 		}

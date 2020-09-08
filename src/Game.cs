@@ -212,6 +212,7 @@ namespace Microsoft.Xna.Framework
 		private long previousTicks = 0;
 		private int updateFrameLag;
 		private bool forceElapsedTimeToZero = false;
+	    private bool isInTickCall;
 
 		private static readonly TimeSpan MaxElapsedTime = TimeSpan.FromMilliseconds(500);
 
@@ -285,6 +286,8 @@ namespace Microsoft.Xna.Framework
 
 		public void Dispose()
 		{
+            // do not cause reentrancy while disposing
+            isInTickCall = true;
 			Dispose(true);
 			GC.SuppressFinalize(this);
 			if (Disposed != null)
@@ -421,6 +424,9 @@ namespace Microsoft.Xna.Framework
 
 		public void Tick()
 		{
+			if (isInTickCall)
+				throw new Exception("Reentrant call to Game.Tick()");
+			isInTickCall = true;
 			/* NOTE: This code is very sensitive and can break very badly,
 			 * even with what looks like a safe change. Be sure to test
 			 * any change fully in both the fixed and variable timestep
@@ -524,11 +530,12 @@ namespace Microsoft.Xna.Framework
 				}
 				else
 				{
-					gameTime.ElapsedGameTime = accumulatedElapsedTime;
+				gameTime.ElapsedGameTime = accumulatedElapsedTime;
 					gameTime.TotalGameTime += gameTime.ElapsedGameTime;
 				}
 
 				accumulatedElapsedTime = TimeSpan.Zero;
+
 				AssertNotDisposed();
 				Update(gameTime);
 			}
@@ -550,6 +557,7 @@ namespace Microsoft.Xna.Framework
 					EndDraw();
 				}
 			}
+			isInTickCall = false;
 		}
 
 		#endregion
@@ -558,6 +566,9 @@ namespace Microsoft.Xna.Framework
 
 		internal void RedrawWindow()
 		{
+			if (isInTickCall)
+				return;
+			isInTickCall = true;
 			/* Draw/EndDraw should not be called if BeginDraw returns false.
 			 * http://stackoverflow.com/questions/4054936/manual-control-over-when-to-redraw-the-screen/4057180#4057180
 			 * http://stackoverflow.com/questions/4235439/xna-3-1-to-4-0-requires-constant-redraw-or-will-display-a-purple-screen
@@ -570,6 +581,7 @@ namespace Microsoft.Xna.Framework
 				Draw(new GameTime(gameTime.TotalGameTime, TimeSpan.Zero));
 				EndDraw();
 			}
+			isInTickCall = false;
 		}
 
 		#endregion
@@ -846,7 +858,7 @@ namespace Microsoft.Xna.Framework
 			 * -caleb
 			 */
 			if (FNAPlatform.NeedsPlatformMainLoop())
-			{
+		{
 				/* This breaks control flow and jumps
 				 * directly into the platform main loop.
 				 * Nothing below this call will be executed.

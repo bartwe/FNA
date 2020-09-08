@@ -134,7 +134,7 @@ namespace Microsoft.Xna.Framework.Content
 					}
 					
 					m_state.block_type = (LzxConstants.BLOCKTYPE)bitbuf.ReadBits(3);
-					i = bitbuf.ReadBits(16);
+				    i = bitbuf.ReadBits(16);
 					j = bitbuf.ReadBits(8);
 					m_state.block_remaining = m_state.block_length = (uint)((i << 8) | j);
 					
