@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Internal Constructor and Deconstructor
+		#region Internal Constructor and Destructor
 
 		internal GraphicsResource()
 		{

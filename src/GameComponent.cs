@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2018 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2020 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -87,14 +87,14 @@ namespace Microsoft.Xna.Framework
 			this.Game = game;
 		}
 
-        #endregion
+		#endregion
 
-        #region Public Dispose Method
+		#region Public Dispose Method
 
-        /// <summary>
-        /// Shuts down the component.
-        /// </summary>
-        public void Dispose()
+		/// <summary>
+		/// Shuts down the component.
+		/// </summary>
+		public void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);

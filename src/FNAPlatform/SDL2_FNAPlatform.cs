@@ -206,15 +206,19 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 
-			// By default, assume physical layout, since XNA games probably assume XInput
-			hint = SDL.SDL_GetHint(SDL.SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS);
-			if (String.IsNullOrEmpty(hint))
-			{
-				SDL.SDL_SetHint(
-					SDL.SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS,
-					"0"
-				);
-			}
+			/* By default, assume physical layout, since XNA games mostly assume XInput.
+			 * This used to be more flexible until Steam decided to enforce the variable
+			 * that already had their desired value as the default (big surprise).
+			 *
+			 * TL;DR: Suck my ass, Steam
+			 *
+			 * -flibit
+			 */
+			SDL.SDL_SetHintWithPriority(
+				SDL.SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS,
+				"0",
+				SDL.SDL_HintPriority.SDL_HINT_OVERRIDE
+			);
 
 			SDL.SDL_SetHint(
 				SDL.SDL_HINT_ORIENTATIONS,
@@ -2165,7 +2169,7 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Keycode.SDLK_RSHIFT,		Keys.RightShift },
 			{ (int) SDL.SDL_Keycode.SDLK_APPLICATION,	Keys.Apps },
 			{ (int) SDL.SDL_Keycode.SDLK_SLASH,		Keys.OemQuestion },
-			{ (int) SDL.SDL_Keycode.SDLK_BACKSLASH,		Keys.OemBackslash },
+			{ (int) SDL.SDL_Keycode.SDLK_BACKSLASH,		Keys.OemPipe },
 			{ (int) SDL.SDL_Keycode.SDLK_LEFTBRACKET,	Keys.OemOpenBrackets },
 			{ (int) SDL.SDL_Keycode.SDLK_RIGHTBRACKET,	Keys.OemCloseBrackets },
 			{ (int) SDL.SDL_Keycode.SDLK_CAPSLOCK,		Keys.CapsLock },
@@ -2296,7 +2300,7 @@ namespace Microsoft.Xna.Framework
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_RSHIFT,		Keys.RightShift },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_APPLICATION,	Keys.Apps },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_SLASH,		Keys.OemQuestion },
-			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_BACKSLASH,	Keys.OemBackslash },
+			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_BACKSLASH,	Keys.OemPipe },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_LEFTBRACKET,	Keys.OemOpenBrackets },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_RIGHTBRACKET,	Keys.OemCloseBrackets },
 			{ (int) SDL.SDL_Scancode.SDL_SCANCODE_CAPSLOCK,		Keys.CapsLock },
@@ -2422,7 +2426,7 @@ namespace Microsoft.Xna.Framework
 			{ (int) Keys.RightShift,	SDL.SDL_Scancode.SDL_SCANCODE_RSHIFT },
 			{ (int) Keys.Apps,		SDL.SDL_Scancode.SDL_SCANCODE_APPLICATION },
 			{ (int) Keys.OemQuestion,	SDL.SDL_Scancode.SDL_SCANCODE_SLASH },
-			{ (int) Keys.OemBackslash,	SDL.SDL_Scancode.SDL_SCANCODE_BACKSLASH },
+			{ (int) Keys.OemPipe,		SDL.SDL_Scancode.SDL_SCANCODE_BACKSLASH },
 			{ (int) Keys.OemOpenBrackets,	SDL.SDL_Scancode.SDL_SCANCODE_LEFTBRACKET },
 			{ (int) Keys.OemCloseBrackets,	SDL.SDL_Scancode.SDL_SCANCODE_RIGHTBRACKET },
 			{ (int) Keys.CapsLock,		SDL.SDL_Scancode.SDL_SCANCODE_CAPSLOCK },
