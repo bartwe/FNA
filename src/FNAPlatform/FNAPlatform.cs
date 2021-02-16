@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2020 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2021 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -110,10 +110,15 @@ namespace Microsoft.Xna.Framework
 			GetGamePadCapabilities =	SDL2_FNAPlatform.GetGamePadCapabilities;
 			GetGamePadState =		SDL2_FNAPlatform.GetGamePadState;
 			SetGamePadVibration =		SDL2_FNAPlatform.SetGamePadVibration;
+			SetGamePadTriggerVibration =	SDL2_FNAPlatform.SetGamePadTriggerVibration;
 			GetGamePadGUID =		SDL2_FNAPlatform.GetGamePadGUID;
 			SetGamePadLightBar =		SDL2_FNAPlatform.SetGamePadLightBar;
+			GetGamePadGyro = 		SDL2_FNAPlatform.GetGamePadGyro;
+			GetGamePadAccelerometer =	SDL2_FNAPlatform.GetGamePadAccelerometer;
 			GetStorageRoot =		SDL2_FNAPlatform.GetStorageRoot;
 			GetDriveInfo =			SDL2_FNAPlatform.GetDriveInfo;
+			ReadFileToPointer =		SDL2_FNAPlatform.ReadToPointer;
+			FreeFilePointer =		SDL2_FNAPlatform.FreeFilePointer;
 			ShowRuntimeError =		SDL2_FNAPlatform.ShowRuntimeError;
 			GetMicrophones =		SDL2_FNAPlatform.GetMicrophones;
 			GetMicrophoneSamples =		SDL2_FNAPlatform.GetMicrophoneSamples;
@@ -278,17 +283,36 @@ namespace Microsoft.Xna.Framework
 		);
 		public static readonly SetGamePadVibrationFunc SetGamePadVibration;
 
+		public delegate bool SetGamePadTriggerVibrationFunc(
+			int index,
+			float leftTrigger,
+			float rightTrigger
+		);
+		public static readonly SetGamePadTriggerVibrationFunc SetGamePadTriggerVibration;
+
 		public delegate string GetGamePadGUIDFunc(int index);
 		public static readonly GetGamePadGUIDFunc GetGamePadGUID;
 
 		public delegate void SetGamePadLightBarFunc(int index, Color color);
 		public static readonly SetGamePadLightBarFunc SetGamePadLightBar;
 
+		public delegate bool GetGamePadGyroFunc(int index, out Vector3 gyro);
+		public static readonly GetGamePadGyroFunc GetGamePadGyro;
+
+		public delegate bool GetGamePadAccelerometerFunc(int index, out Vector3 accel);
+		public static readonly GetGamePadAccelerometerFunc GetGamePadAccelerometer;
+
 		public delegate string GetStorageRootFunc();
 		public static readonly GetStorageRootFunc GetStorageRoot;
 
 		public delegate DriveInfo GetDriveInfoFunc(string storageRoot);
 		public static readonly GetDriveInfoFunc GetDriveInfo;
+
+		public delegate IntPtr ReadFileToPointerFunc(string path, out IntPtr size);
+		public static readonly ReadFileToPointerFunc ReadFileToPointer;
+
+		public delegate void FreeFilePointerFunc(IntPtr file);
+		public static readonly FreeFilePointerFunc FreeFilePointer;
 
 		public delegate void ShowRuntimeErrorFunc(string title, string message);
 		public static readonly ShowRuntimeErrorFunc ShowRuntimeError;
