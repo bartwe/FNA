@@ -824,12 +824,19 @@ namespace Microsoft.Xna.Framework
 							textInputControlRepeat[textIndex] = Environment.TickCount + 400;
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if (Keyboard.keys.Contains(Keys.LeftControl) && key == Keys.V)
-						{
-							textInputControlDown[6] = true;
-							textInputControlRepeat[6] = Environment.TickCount + 400;
-							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
-							textInputSuppress = true;
+						else if (Keyboard.keys.Contains(Keys.LeftControl)) {
+							if (key == Keys.V) {
+								textInputControlDown[6] = true;
+								textInputControlRepeat[6] = Environment.TickCount + 400;
+								TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
+								textInputSuppress = true;
+							}
+							else if (key == Keys.C) {
+								textInputControlDown[7] = true;
+								textInputControlRepeat[7] = Environment.TickCount + 400;
+								TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[7]);
+								textInputSuppress = true;
+							}
 						}
 					}
 				}
@@ -843,9 +850,18 @@ namespace Microsoft.Xna.Framework
 						{
 							textInputControlDown[value] = false;
 						}
-						else if ((!Keyboard.keys.Contains(Keys.LeftControl) && textInputControlDown[6]) || key == Keys.V)
+						else if (!Keyboard.keys.Contains(Keys.LeftControl)) {
+							textInputControlDown[7] = false;
+							textInputControlDown[6] = false;
+							textInputSuppress = false;
+						}
+						else if (key == Keys.V)
 						{
 							textInputControlDown[6] = false;
+							textInputSuppress = false;
+						}
+						else if (key == Keys.C) {
+							textInputControlDown[7] = false;
 							textInputSuppress = false;
 						}
 					}
