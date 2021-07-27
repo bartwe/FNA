@@ -813,7 +813,7 @@ namespace Microsoft.Xna.Framework
 							textInputControlRepeat[textIndex] = Environment.TickCount + 400;
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if (Keyboard.keys.Contains(Keys.LeftControl)) {
+						else if (Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl)) {
 							if (key == Keys.V) {
 								textInputControlDown[6] = true;
 								textInputControlRepeat[6] = Environment.TickCount + 400;
@@ -839,7 +839,7 @@ namespace Microsoft.Xna.Framework
 						{
 							textInputControlDown[value] = false;
 						}
-						else if (!Keyboard.keys.Contains(Keys.LeftControl)) {
+						else if (!Keyboard.keys.Contains(Keys.LeftControl) && !Keyboard.keys.Contains(Keys.RightControl)) {
 							textInputControlDown[7] = false;
 							textInputControlDown[6] = false;
 							textInputSuppress = false;
