@@ -145,17 +145,20 @@ namespace Microsoft.Xna.Framework
 		public static readonly string TitleLocation;
 
 		/* Setup Text Input Control Character Arrays
-		 * (Only 7 control keys supported at this time)
+		 * (Only 8 control keys supported at this time)
 		 */
 		public static readonly char[] TextInputCharacters = new char[]
 		{
 			(char) 2,	// Home
-			(char) 3,	// End
+			(char) 4,	// End
 			(char) 8,	// Backspace
 			(char) 9,	// Tab
 			(char) 13,	// Enter
 			(char) 127,	// Delete
-			(char) 22	// Ctrl+V (Paste)
+
+
+			(char) 22,	// Ctrl+V (Paste)
+			(char) 3	// Ctrl+C (Copy)
 		};
 		public static readonly Dictionary<Keys, int> TextInputBindings = new Dictionary<Keys, int>()
 		{
@@ -166,6 +169,7 @@ namespace Microsoft.Xna.Framework
 			{ Keys.Enter,	4 },
 			{ Keys.Delete,	5 }
 			// Ctrl+V is special!
+			// Ctrl+C is special!
 		};
 
 		#endregion
