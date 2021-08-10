@@ -1703,5 +1703,29 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		#endregion
+
+		public void CheckRequirements(SupportRequirements requirements) {
+			if (requirements == SupportRequirements.None)
+				return;
+
+			if ((requirements & SupportRequirements.VertexTextures) == SupportRequirements.VertexTextures)
+			{
+				int maxTextures, maxVertexTextures;
+				FNA3D.FNA3D_GetMaxTextureSlots(
+					GLDevice,
+					out maxTextures,
+					out maxVertexTextures
+				);
+				if (maxTextures <= 0 || maxVertexTextures <= 0)
+					throw new Exception("Driver does not support vertex textures.");
+			}
+		}
+
+		[Flags]
+		public enum SupportRequirements
+		{
+			None,
+			VertexTextures
+		}
 	}
 }
