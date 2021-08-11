@@ -29,11 +29,6 @@ namespace Microsoft.Xna.Framework
 	{
 		#region Public Static Methods
 
-		/// <summary>
-		/// Returns an open stream to an exsiting file in the title storage area.
-		/// </summary>
-		/// <param name="name">The filepath relative to the title storage area.</param>
-		/// <returns>A open stream or null if the file is not found.</returns>
 		public static Stream OpenStream(string name)
 		{
 			string safeName = MonoGame.Utilities.FileHelpers.NormalizeFilePathSeparators(name);
@@ -67,11 +62,20 @@ namespace Microsoft.Xna.Framework
 			}
 			safeName = GetCaseName(Path.Combine(TitleLocation.Path, safeName));
 #endif
+			string realName;
 			if (Path.IsPathRooted(safeName))
 			{
-				return FNAPlatform.ReadFileToPointer(safeName, out size);
+				realName = safeName;
 			}
-			return FNAPlatform.ReadFileToPointer(Path.Combine(TitleLocation.Path, safeName), out size);
+			else
+			{
+				realName = Path.Combine(TitleLocation.Path, safeName);
+			}
+			if (!File.Exists(realName))
+			{
+				throw new FileNotFoundException(realName);
+			}
+			return FNAPlatform.ReadFileToPointer(realName, out size);
 		}
 
 		#endregion

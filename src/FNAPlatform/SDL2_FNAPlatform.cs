@@ -40,11 +40,6 @@ namespace Microsoft.Xna.Framework
 		private static int RetinaWidth;
 		private static int RetinaHeight;
 
-		private static readonly bool OSXUseSpaces = (
-			SDL.SDL_GetPlatform().Equals("Mac OS X") && // Prevents race with OSVersion
-			SDL.SDL_GetHintBoolean(SDL.SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES, SDL.SDL_bool.SDL_TRUE) == SDL.SDL_bool.SDL_TRUE
-		);
-
 		#endregion
 
 		#region Game Objects
@@ -89,24 +84,6 @@ namespace Microsoft.Xna.Framework
 			 */
 			SDL.SDL_SetMainReady();
 
-			/* A number of platforms don't support global mouse, but
-			 * this really only matters on desktop where the game
-			 * screen may not be covering the whole display.
-			 */
-			if (	OSVersion.Equals("Windows") ||
-				OSVersion.Equals("Mac OS X") ||
-				OSVersion.Equals("Linux") ||
-				OSVersion.Equals("FreeBSD") ||
-				OSVersion.Equals("OpenBSD") ||
-				OSVersion.Equals("NetBSD")	)
-			{
-				SupportsGlobalMouse = true;
-			}
-			else
-			{
-				SupportsGlobalMouse = false;
-			}
-
 			// Also, Windows is an idiot. -flibit
 			if (	OSVersion.Equals("Windows") ||
 				OSVersion.Equals("WinRT")	)
@@ -145,7 +122,8 @@ namespace Microsoft.Xna.Framework
 			);
 			if (File.Exists(mappingsDB))
 			{
-				SDL.SDL_GameControllerAddMappingsFromFile(
+				SDL.SDL_SetHint(
+					SDL.SDL_HINT_GAMECONTROLLERCONFIG_FILE,
 					mappingsDB
 				);
 			}
@@ -202,6 +180,40 @@ namespace Microsoft.Xna.Framework
 				SDL.SDL_INIT_GAMECONTROLLER |
 				SDL.SDL_INIT_HAPTIC
 			);
+
+			/* A number of platforms don't support global mouse, but
+			 * this really only matters on desktop where the game
+			 * screen may not be covering the whole display.
+			 */
+			if (	OSVersion.Equals("Windows") ||
+				OSVersion.Equals("Mac OS X") ||
+				SDL.SDL_GetCurrentVideoDriver() == "x11"	)
+			{
+				SupportsGlobalMouse = true;
+			}
+			else
+			{
+				SupportsGlobalMouse = false;
+			}
+
+			/* We need to change the Windows default here, as the
+			 * display server does not seem to handle focus changes
+			 * gracefully like Wayland (and even X11) do. If for
+			 * _any_ reason focus changes we need to minimize,
+			 * because the alternative is having a window up front
+			 * that has no focus and therefore gets no events, and
+			 * the user (rightfully) will have no idea why.
+			 * -flibit
+			 */
+			if (	OSVersion.Equals("Windows") ||
+				OSVersion.Equals("WinRT")	)
+			{
+				SDL.SDL_SetHint(
+					SDL.SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
+					"1"
+				);
+			}
+
 
 			// Set any hints to match XNA4 behavior...
 			string hint = SDL.SDL_GetHint(SDL.SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS);
@@ -412,8 +424,7 @@ namespace Microsoft.Xna.Framework
 			ref string resultDeviceName
 		) {
 			bool center = false;
-			if (	Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1" &&
-				OSVersion.Equals("Mac OS X")	)
+			if (Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1")
 			{
 				/* For high-DPI windows, halve the size!
 				 * The drawable size is now the primary width/height, so
@@ -813,19 +824,12 @@ namespace Microsoft.Xna.Framework
 							textInputControlRepeat[textIndex] = Environment.TickCount + 400;
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if (Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl)) {
-							if (key == Keys.V) {
-								textInputControlDown[6] = true;
-								textInputControlRepeat[6] = Environment.TickCount + 400;
-								TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
-								textInputSuppress = true;
-							}
-							else if (key == Keys.C) {
-								textInputControlDown[7] = true;
-								textInputControlRepeat[7] = Environment.TickCount + 400;
-								TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[7]);
-								textInputSuppress = true;
-							}
+						else if (Keyboard.keys.Contains(Keys.LeftControl) && key == Keys.V)
+						{
+							textInputControlDown[6] = true;
+							textInputControlRepeat[6] = Environment.TickCount + 400;
+							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
+							textInputSuppress = true;
 						}
 					}
 				}
@@ -839,18 +843,9 @@ namespace Microsoft.Xna.Framework
 						{
 							textInputControlDown[value] = false;
 						}
-						else if (!Keyboard.keys.Contains(Keys.LeftControl) && !Keyboard.keys.Contains(Keys.RightControl)) {
-							textInputControlDown[7] = false;
-							textInputControlDown[6] = false;
-							textInputSuppress = false;
-						}
-						else if (key == Keys.V)
+						else if ((!Keyboard.keys.Contains(Keys.LeftControl) && textInputControlDown[6]) || key == Keys.V)
 						{
 							textInputControlDown[6] = false;
-							textInputSuppress = false;
-						}
-						else if (key == Keys.C) {
-							textInputControlDown[7] = false;
 							textInputSuppress = false;
 						}
 					}
@@ -913,7 +908,7 @@ namespace Microsoft.Xna.Framework
 					{
 						game.IsActive = true;
 
-						if (!OSXUseSpaces)
+						if (SDL.SDL_GetCurrentVideoDriver() == "x11")
 						{
 							// If we alt-tab away, we lose the 'fullscreen desktop' flag on some WMs
 							SDL.SDL_SetWindowFullscreen(
@@ -931,7 +926,7 @@ namespace Microsoft.Xna.Framework
 					{
 						game.IsActive = false;
 
-						if (!OSXUseSpaces)
+						if (SDL.SDL_GetCurrentVideoDriver() == "x11")
 						{
 							SDL.SDL_SetWindowFullscreen(game.Window.Handle, 0);
 						}
@@ -1141,14 +1136,14 @@ namespace Microsoft.Xna.Framework
 		private static Game emscriptenGame;
 		private delegate void em_callback_func();
 
-		[DllImport("emscripten", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("__Native", CallingConvention = CallingConvention.Cdecl)]
 		private static extern void emscripten_set_main_loop(
 			em_callback_func func,
 			int fps,
 			int simulate_infinite_loop
 		);
 
-		[DllImport("emscripten", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("__Native", CallingConvention = CallingConvention.Cdecl)]
 		private static extern void emscripten_cancel_main_loop();
 
 		[ObjCRuntime.MonoPInvokeCallback(typeof(em_callback_func))]
@@ -1646,9 +1641,6 @@ namespace Microsoft.Xna.Framework
 				return new GamePadState();
 			}
 
-			// The "master" button state is built from this.
-			Buttons gc_buttonState = (Buttons) 0;
-
 			// Sticks
 			Vector2 stickLeft = new Vector2(
 				(float) SDL.SDL_GameControllerGetAxis(
@@ -1670,22 +1662,6 @@ namespace Microsoft.Xna.Framework
 					SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_RIGHTY
 				) / -32767.0f
 			);
-			gc_buttonState |= READ_StickToButtons(
-				stickLeft,
-				Buttons.LeftThumbstickLeft,
-				Buttons.LeftThumbstickRight,
-				Buttons.LeftThumbstickUp,
-				Buttons.LeftThumbstickDown,
-				GamePad.LeftDeadZone
-			);
-			gc_buttonState |= READ_StickToButtons(
-				stickRight,
-				Buttons.RightThumbstickLeft,
-				Buttons.RightThumbstickRight,
-				Buttons.RightThumbstickUp,
-				Buttons.RightThumbstickDown,
-				GamePad.RightDeadZone
-			);
 
 			// Triggers
 			float triggerLeft = (float) SDL.SDL_GameControllerGetAxis(
@@ -1696,16 +1672,9 @@ namespace Microsoft.Xna.Framework
 				device,
 				SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_TRIGGERRIGHT
 			) / 32767.0f;
-			if (triggerLeft > GamePad.TriggerThreshold)
-			{
-				gc_buttonState |= Buttons.LeftTrigger;
-			}
-			if (triggerRight > GamePad.TriggerThreshold)
-			{
-				gc_buttonState |= Buttons.RightTrigger;
-			}
 
 			// Buttons
+			Buttons gc_buttonState = (Buttons) 0;
 			if (SDL.SDL_GameControllerGetButton(device, SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A) != 0)
 			{
 				gc_buttonState |= Buttons.A;
@@ -2156,9 +2125,21 @@ namespace Microsoft.Xna.Framework
 			}
 
 			// Print controller information to stdout.
+			string deviceInfo;
+			string mapping = SDL.SDL_GameControllerMapping(INTERNAL_devices[which]);
+			if (string.IsNullOrEmpty(mapping))
+			{
+				deviceInfo = "Mapping not found";
+			}
+			else
+			{
+				deviceInfo = "Mapping: " + mapping;
+			}
 			FNALoggerEXT.LogInfo(
 				"Controller " + which.ToString() + ": " +
-				SDL.SDL_GameControllerName(INTERNAL_devices[which])
+				SDL.SDL_GameControllerName(INTERNAL_devices[which]) + ", " +
+				"GUID: " + INTERNAL_guids[which] + ", " +
+				deviceInfo
 			);
 		}
 
@@ -2180,31 +2161,6 @@ namespace Microsoft.Xna.Framework
 			SDL.SDL_ClearError();
 
 			FNALoggerEXT.LogInfo("Removed device, player: " + output.ToString());
-		}
-
-		// GetState can convert stick values to button values
-		private static Buttons READ_StickToButtons(Vector2 stick, Buttons left, Buttons right, Buttons up , Buttons down, float DeadZoneSize)
-		{
-			Buttons b = (Buttons) 0;
-
-			if (stick.X > DeadZoneSize)
-			{
-				b |= right;
-			}
-			if (stick.X < -DeadZoneSize)
-			{
-				b |= left;
-			}
-			if (stick.Y > DeadZoneSize)
-			{
-				b |= up;
-			}
-			if (stick.Y < -DeadZoneSize)
-			{
-				b |= down;
-			}
-
-			return b;
 		}
 
 		private static string[] GenStringArray()
