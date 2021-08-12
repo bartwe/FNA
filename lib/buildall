@@ -29,7 +29,7 @@ cmake -DCMAKE_C_FLAGS=-std=gnu99 -DSDL2_INCLUDE_DIRS=$SDL_INCLUDE_DIR -DSDL2_LIB
 make clean
 make
 echo ~~~~Copying FNA3D~~~~
-cp ./libFNA3D.so.0.21.02 ../../Nexel_Linux/libFNA3D.so.0
+cp ./libFNA3D.so.0.21.08 ../../Nexel_Linux/libFNA3D.so.0
 
 #build FAudio and copy to /building/
 echo ~~~~Building FAudio~~~~
@@ -38,7 +38,7 @@ cmake -DCMAKE_C_FLAGS=-std=gnu99 -DSDL2_INCLUDE_DIRS=$SDL_INCLUDE_DIR -DSDL2_LIB
 make clean
 make
 echo ~~~~Copying FAudio~~~~
-cp ./libFAudio.so.0.21.02 ../../Nexel_Linux/libFAudio.so.0
+cp ./libFAudio.so.0.21.08 ../../Nexel_Linux/libFAudio.so.0
 
 if [ $# -ge 3 ] ; then
     echo ~~~~Copying to $3~~~~
