@@ -817,6 +817,7 @@ namespace Microsoft.Xna.Framework
 					if (!Keyboard.keys.Contains(key))
 					{
 						Keyboard.keys.Add(key);
+						TextInputEXT.OnTextInputExt(key);
 						int textIndex;
 						if (FNAPlatform.TextInputBindings.TryGetValue(key, out textIndex))
 						{

@@ -78,5 +78,15 @@ namespace Microsoft.Xna.Framework.Input
 		}
 
 		#endregion
+
+		public static event Action<Keys> TextInputExt;
+
+		internal static void OnTextInputExt(Keys key)
+		{
+			if (TextInputExt != null)
+			{
+				TextInputExt(key);
+			}
+		}
 	}
 }
