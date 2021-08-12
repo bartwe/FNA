@@ -160,6 +160,19 @@ namespace Microsoft.Xna.Framework
 			(char) 22,	// Ctrl+V (Paste)
 			(char) 3	// Ctrl+C (Copy)
 		};
+		public static readonly Keys[] TextInputKeys = new Keys[]
+		{
+			Keys.Home,
+			Keys.End,
+			Keys.Back,
+			Keys.Tab,
+			Keys.Enter,
+			Keys.Delete,
+
+
+			Keys.V,	// Ctrl+V (Paste)
+			Keys.C	// Ctrl+C (Copy)
+		};
 		public static readonly Dictionary<Keys, int> TextInputBindings = new Dictionary<Keys, int>()
 		{
 			{ Keys.Home,	0 },

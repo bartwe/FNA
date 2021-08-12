@@ -1110,6 +1110,7 @@ namespace Microsoft.Xna.Framework
 			{
 				if (textInputControlDown[i] && textInputControlRepeat[i] <= Environment.TickCount)
 				{
+					TextInputEXT.OnTextInputExt(FNAPlatform.TextInputKeys[i]);
 					TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[i]);
 				}
 			}
