@@ -1717,7 +1717,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					out maxVertexTextures
 				);
 				if (maxTextures <= 0 || maxVertexTextures <= 0)
-					throw new Exception("Driver does not support vertex textures.");
+					throw new Exception($"Driver does not support vertex textures: {maxTextures} - {maxVertexTextures}");
 			}
 		}
 

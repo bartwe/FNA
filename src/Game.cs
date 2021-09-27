@@ -528,7 +528,7 @@ namespace Microsoft.Xna.Framework
 				}
 				else
 				{
-				gameTime.ElapsedGameTime = accumulatedElapsedTime;
+					gameTime.ElapsedGameTime = accumulatedElapsedTime;
 					gameTime.TotalGameTime += gameTime.ElapsedGameTime;
 				}
 
@@ -856,7 +856,7 @@ namespace Microsoft.Xna.Framework
 			 * -caleb
 			 */
 			if (FNAPlatform.NeedsPlatformMainLoop())
-		{
+			{
 				/* This breaks control flow and jumps
 				 * directly into the platform main loop.
 				 * Nothing below this call will be executed.
