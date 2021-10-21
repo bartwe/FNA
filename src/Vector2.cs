@@ -109,6 +109,7 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Fields
 
+		// These are NOT readonly, for weird performance reasons -flibit
 		private static Vector2 zeroVector = new Vector2(0f, 0f);
 		private static Vector2 unitVector = new Vector2(1f, 1f);
 		private static Vector2 unitXVector = new Vector2(1f, 0f);

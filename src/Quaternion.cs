@@ -92,6 +92,7 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Variables
 
+		// This is NOT readonly, for weird performance reasons -flibit
 		private static Quaternion identity = new Quaternion(0, 0, 0, 1);
 
 		#endregion

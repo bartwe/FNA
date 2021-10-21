@@ -173,7 +173,8 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Fields
 
-		private static Vector3 zero = new Vector3(0f, 0f, 0f); // Not readonly for performance -flibit
+		// These are NOT readonly, for weird performance reasons -flibit
+		private static Vector3 zero = new Vector3(0f, 0f, 0f);
 		private static Vector3 one = new Vector3(1f, 1f, 1f);
 		private static Vector3 unitX = new Vector3(1f, 0f, 0f);
 		private static Vector3 unitY = new Vector3(0f, 1f, 0f);
