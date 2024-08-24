@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2024 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2021 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -120,11 +120,24 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		#endregion
+        public static SpriteFont SpriteFontEXT(
+            Texture2D texture,
+            List<Rectangle> glyphBounds,
+            List<Rectangle> cropping,
+            List<char> characters,
+            int lineSpacing,
+            float spacing,
+            List<Vector3> kerningData,
+            char? defaultCharacter
+        ) {
+            return new SpriteFont(texture, glyphBounds, cropping, characters, lineSpacing, spacing, kerningData, defaultCharacter);
+        }
 
-		#region Public MeasureString Methods
+        #endregion
 
-		public Vector2 MeasureString(string text)
+        #region Public MeasureString Methods
+
+        public Vector2 MeasureString(string text)
 		{
 			/* FIXME: This method is a duplicate of MeasureString(StringBuilder)!
 			 * The only difference is how we iterate through the string.

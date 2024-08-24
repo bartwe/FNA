@@ -9,39 +9,61 @@
 
 #region Using Statements
 using System;
+using System.Runtime.CompilerServices;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics.PackedVector
 {
-	/// <summary>
-	/// Packed vector type containing four 8-bit unsigned integer values, ranging from 0 to 255.
-	/// </summary>
+    /// <summary>
+    /// Packed vector type containing four 8-bit unsigned integer values, ranging from 0 to 255.
+    /// </summary>
 	public struct Byte4 : IPackedVector<uint>, IEquatable<Byte4>, IPackedVector
 	{
-		#region Public Properties
+        #region Public Properties
 
-		/// <summary>
-		/// Directly gets or sets the packed representation of the value.
-		/// </summary>
-		/// <value>The packed representation of the value.</value>
-		[CLSCompliant(false)]
-		uint IPackedVector<uint>.PackedValue
-		{
-			get
-			{
-				return PackedValue;
-			}
-			set
-			{
-				PackedValue = value;
-			}
-		}
+        /// <summary>
+        /// Directly gets or sets the packed representation of the value.
+        /// </summary>
+        /// <value>The packed representation of the value.</value>
+        uint IPackedVector<uint>.PackedValue {
+            get {
+                return PackedValue;
+            }
+            set {
+                PackedValue = value;
+            }
+        }
 
-		#endregion
+        public int X {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)(PackedValue & 0xFF); }
+        }
 
-		#region Private Variables
 
-		public uint PackedValue;
+        public int Y {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)((PackedValue >> 8) & 0xFF); }
+        }
+
+        public int Z {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)((PackedValue >> 16) & 0xFF); }
+        }
+
+        public int W {
+            [System.Runtime.TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (int)((PackedValue >> 24)); }
+        }
+        #endregion
+
+        #region Private Variables
+
+        // bartwe: hacked for moar speeds
+        public uint PackedValue;
 
 		#endregion
 
@@ -70,6 +92,15 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 			PackedValue = Pack(x, y, z, w);
 		}
 
+        public Byte4(int x, int y, int z, int w)
+		{
+            PackedValue = 
+				((uint) x) |
+				(((uint) y) << 8) |
+				(((uint) z) << 16) |
+				(((uint) w) << 24);
+		}
+
 		#endregion
 
 		#region Public Methods
@@ -82,9 +113,9 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		{
 			return new Vector4(
 				(PackedValue & 0xFF),
-				((PackedValue >> 8) & 0xFF),
-				((PackedValue >> 16) & 0xFF),
-				(PackedValue >> 24)
+                ((PackedValue >> 8) & 0xFF),
+                ((PackedValue >> 16) & 0xFF),
+                (PackedValue >> 24)
 			);
 		}
 
@@ -98,7 +129,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		/// <param name="vector">The vector to create the packed representation from.</param>
 		void IPackedVector.PackFromVector4(Vector4 vector)
 		{
-			PackedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
+            PackedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
 		}
 
 		#endregion
@@ -114,7 +145,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		/// <returns>True if the objects are different; false otherwise.</returns>
 		public static bool operator !=(Byte4 a, Byte4 b)
 		{
-			return a.PackedValue != b.PackedValue;
+            return a.PackedValue != b.PackedValue;
 		}
 
 		/// <summary>
@@ -126,7 +157,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		/// <returns>True if the objects are the same; false otherwise.</returns>
 		public static bool operator ==(Byte4 a, Byte4 b)
 		{
-			return a.PackedValue == b.PackedValue;
+            return a.PackedValue == b.PackedValue;
 		}
 
 		/// <summary>
@@ -161,7 +192,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		/// <returns>Hash code for the instance.</returns>
 		public override int GetHashCode()
 		{
-			return PackedValue.GetHashCode();
+            return PackedValue.GetHashCode();
 		}
 
 		/// <summary>
@@ -170,7 +201,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		/// <returns>String that represents the object.</returns>
 		public override string ToString()
 		{
-			return PackedValue.ToString("X");
+            return PackedValue.ToString("X");
 		}
 
 		#endregion

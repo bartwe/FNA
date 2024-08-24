@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2024 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2021 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -139,7 +139,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				SurfaceFormat.Dxt3,
 				SurfaceFormat.Dxt5,
 				SurfaceFormat.NormalizedByte2,
-				SurfaceFormat.NormalizedByte4
+				SurfaceFormat.NormalizedByte4,
 			};
 			Reach.ValidCubeFormats = new List<SurfaceFormat>()
 			{
@@ -221,7 +221,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				SurfaceFormat.HalfSingle,
 				SurfaceFormat.HalfVector2,
 				SurfaceFormat.HalfVector4,
-				SurfaceFormat.HdrBlendable
+				SurfaceFormat.HdrBlendable,
+                SurfaceFormat.ColorSrgbEXT
 			};
 			HiDef.ValidCubeFormats = new List<SurfaceFormat>()
 			{
@@ -242,8 +243,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				SurfaceFormat.HalfSingle,
 				SurfaceFormat.HalfVector2,
 				SurfaceFormat.HalfVector4,
-				SurfaceFormat.HdrBlendable
-			};
+				SurfaceFormat.HdrBlendable,
+                SurfaceFormat.ColorSrgbEXT
+            };
 			HiDef.ValidVolumeFormats = new List<SurfaceFormat>()
 			{
 				SurfaceFormat.Color,
@@ -260,8 +262,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				SurfaceFormat.HalfSingle,
 				SurfaceFormat.HalfVector2,
 				SurfaceFormat.HalfVector4,
-				SurfaceFormat.HdrBlendable
-			};
+				SurfaceFormat.HdrBlendable,
+                SurfaceFormat.ColorSrgbEXT
+            };
 			HiDef.ValidVertexTextureFormats = new List<SurfaceFormat>()
 			{
 				SurfaceFormat.Single,
@@ -270,8 +273,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				SurfaceFormat.HalfSingle,
 				SurfaceFormat.HalfVector2,
 				SurfaceFormat.HalfVector4,
-				SurfaceFormat.HdrBlendable
-			};
+				SurfaceFormat.HdrBlendable,
+                SurfaceFormat.ColorSrgbEXT
+            };
 			HiDef.InvalidFilterFormats = new List<SurfaceFormat>()
 			{
 				SurfaceFormat.Single,

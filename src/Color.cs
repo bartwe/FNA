@@ -15,6 +15,8 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using Microsoft.Xna.Framework.Design;
@@ -92,6 +94,8 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		public byte A
 		{
+            [TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				unchecked
@@ -99,6 +103,8 @@ namespace Microsoft.Xna.Framework
 					return (byte) (this.PackedValue >> 24);
 				}
 			}
+            [TargetedPatchingOptOut("")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.PackedValue = (this.PackedValue & 0x00ffffff) | ((uint) value << 24);
@@ -1596,6 +1602,40 @@ namespace Microsoft.Xna.Framework
 			G = (byte) MathHelper.Clamp(color.Y * 255, Byte.MinValue, Byte.MaxValue);
 			B = (byte) MathHelper.Clamp(color.Z * 255, Byte.MinValue, Byte.MaxValue);
 			A = 255;
+		}
+
+		/// <summary>
+		/// Constructs an RGBA color from a <see cref="Color"/> and an alpha value.
+		/// </summary>
+		/// <param name="color">
+		/// A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.
+		/// </param>
+		/// <param name="alpha">The alpha component value from 0 to 255.</param>
+		public Color(Color color, int alpha)
+		{
+			PackedValue = 0;
+
+			R = color.R;
+			G = color.G;
+			B = color.B;
+			A = (byte) MathHelper.Clamp(alpha, Byte.MinValue, Byte.MaxValue);
+		}
+
+		/// <summary>
+		/// Constructs an RGBA color from color and alpha value.
+		/// </summary>
+		/// <param name="color">
+		/// A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.
+		/// </param>
+		/// <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
+		public Color(Color color, float alpha)
+		{
+			PackedValue = 0;
+
+			R = color.R;
+			G = color.G;
+			B = color.B;
+			A = (byte) MathHelper.Clamp(alpha * 255, Byte.MinValue, Byte.MaxValue);
 		}
 
 		/// <summary>

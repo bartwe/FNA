@@ -116,6 +116,9 @@ namespace Microsoft.Xna.Framework
 			StartTextInput =		SDL2.SDL.SDL_StartTextInput;
 			StopTextInput =			SDL2.SDL.SDL_StopTextInput;
 			SetTextInputRectangle =		SDL2_FNAPlatform.SetTextInputRectangle;
+			HasClipboardText =		SDL2_FNAPlatform.HasClipboardText;
+			GetClipboardText =		SDL2_FNAPlatform.GetClipboardText;
+			SetClipboardText =		SDL2_FNAPlatform.SetClipboardText;
 			GetMouseState =			SDL2_FNAPlatform.GetMouseState;
 			SetMousePosition =		SDL2.SDL.SDL_WarpMouseInWindow;
 			OnIsMouseVisibleChanged =	SDL2_FNAPlatform.OnIsMouseVisibleChanged;
@@ -164,7 +167,7 @@ namespace Microsoft.Xna.Framework
 		public static readonly string TitleLocation;
 
 		/* Setup Text Input Control Character Arrays
-		 * (Only 7 control keys supported at this time)
+		 * (Only 8 control keys supported at this time)
 		 */
 		public static readonly char[] TextInputCharacters = new char[]
 		{
@@ -174,7 +177,23 @@ namespace Microsoft.Xna.Framework
 			(char) 9,	// Tab
 			(char) 13,	// Enter
 			(char) 127,	// Delete
-			(char) 22	// Ctrl+V (Paste)
+
+
+			(char) 22,	// Ctrl+V (Paste)
+			(char) 3	// Ctrl+C (Copy)
+		};
+		public static readonly Keys[] TextInputKeys = new Keys[]
+		{
+			Keys.Home,
+			Keys.End,
+			Keys.Back,
+			Keys.Tab,
+			Keys.Enter,
+			Keys.Delete,
+
+
+			Keys.V,	// Ctrl+V (Paste)
+			Keys.C	// Ctrl+C (Copy)
 		};
 		public static readonly Dictionary<Keys, int> TextInputBindings = new Dictionary<Keys, int>()
 		{
@@ -185,6 +204,7 @@ namespace Microsoft.Xna.Framework
 			{ Keys.Enter,	4 },
 			{ Keys.Delete,	5 }
 			// Ctrl+V is special!
+			// Ctrl+C is special!
 		};
 
 		#endregion
@@ -275,6 +295,13 @@ namespace Microsoft.Xna.Framework
 
 		public delegate void SetTextInputRectangleFunc(Rectangle rectangle);
 		public static readonly SetTextInputRectangleFunc SetTextInputRectangle;
+
+		public delegate bool HasClipboardTextFunc();
+		public static readonly HasClipboardTextFunc HasClipboardText;
+		public delegate string GetClipboardTextFunc();
+		public static readonly GetClipboardTextFunc GetClipboardText;
+		public delegate void SetClipboardTextFunc(string text);
+		public static readonly SetClipboardTextFunc SetClipboardText;
 
 		public delegate void GetMouseStateFunc(
 			IntPtr window,
