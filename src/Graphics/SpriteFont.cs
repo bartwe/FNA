@@ -120,6 +120,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+        public static SpriteFont SpriteFontEXT(
+            Texture2D texture,
+            List<Rectangle> glyphBounds,
+            List<Rectangle> cropping,
+            List<char> characters,
+            int lineSpacing,
+            float spacing,
+            List<Vector3> kerningData,
+            char? defaultCharacter
+        ) {
+            return new SpriteFont(texture, glyphBounds, cropping, characters, lineSpacing, spacing, kerningData, defaultCharacter);
+        }
+
 		#endregion
 
 		#region Public MeasureString Methods

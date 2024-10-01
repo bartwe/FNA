@@ -90,6 +90,30 @@ namespace Microsoft.Xna.Framework.Input
 			FNAPlatform.SetTextInputRectangle(WindowHandle, rectangle);
 		}
 
+		/// <summary>
+		/// Checks if there is text in the clipboard.
+		/// </summary>
+		/// <returns>Clipboard has text.</returns>
+		public static bool HasClipBoardText() {
+			return FNAPlatform.HasClipboardText();
+		}
+
+		/// <summary>
+		/// Gets the current text in the clipboard.
+		/// </summary>
+		/// <returns>Clipboard Text.</returns>
+		public static string GetClipBoardText() {
+			return FNAPlatform.GetClipboardText();
+		}
+
+		/// <summary>
+		/// Sets the current text in the clipboard.
+		/// </summary>
+		/// <param name="text">The text to be set in the clipboard.</param>
+		public static void SetClipBoardText(string text) {
+			FNAPlatform.SetClipboardText(text);
+		}
+
 		#endregion
 
 		#region Internal Event Access Method
@@ -111,5 +135,15 @@ namespace Microsoft.Xna.Framework.Input
 		}
 
 		#endregion
+
+		public static event Action<Keys> TextInputExt;
+
+		internal static void OnTextInputExt(Keys key)
+		{
+			if (TextInputExt != null)
+			{
+				TextInputExt(key);
+			}
+		}
 	}
 }

@@ -969,15 +969,25 @@ namespace Microsoft.Xna.Framework
 					if (!Keyboard.keys.Contains(key))
 					{
 						Keyboard.keys.Add(key);
+						TextInputEXT.OnTextInputExt(key);
 						int textIndex;
 						if (FNAPlatform.TextInputBindings.TryGetValue(key, out textIndex))
 						{
 							textInputControlDown[textIndex] = true;
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[textIndex]);
 						}
-						else if ((Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl))
-							&& key == Keys.V)
+						else if ((Keyboard.keys.Contains(Keys.LeftControl) || Keyboard.keys.Contains(Keys.RightControl)))
 						{
+							if (key == Keys.V) {
+								textInputControlDown[6] = true;
+								TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
+								textInputSuppress = true;
+							}
+							else if (key == Keys.C) {
+								textInputControlDown[7] = true;
+								TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[7]);
+								textInputSuppress = true;
+							}
 							textInputControlDown[6] = true;
 							TextInputEXT.OnTextInput(FNAPlatform.TextInputCharacters[6]);
 							textInputSuppress = true;
@@ -1007,10 +1017,18 @@ namespace Microsoft.Xna.Framework
 						{
 							textInputControlDown[value] = false;
 						}
-						else if (((!Keyboard.keys.Contains(Keys.LeftControl) && !Keyboard.keys.Contains(Keys.RightControl)) && textInputControlDown[6])
-							|| key == Keys.V)
+						else if (!Keyboard.keys.Contains(Keys.LeftControl) && !Keyboard.keys.Contains(Keys.RightControl)) {
+							textInputControlDown[7] = false;
+							textInputControlDown[6] = false;
+							textInputSuppress = false;
+						}
+						else if (key == Keys.V)
 						{
 							textInputControlDown[6] = false;
+							textInputSuppress = false;
+						}
+						else if (key == Keys.C) {
+							textInputControlDown[7] = false;
 							textInputSuppress = false;
 						}
 					}
@@ -2873,6 +2891,22 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 			return Keys.None;
+		}
+
+		#endregion
+
+		#region Clipboard Methods
+
+		public static bool HasClipboardText() {
+			return SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_TRUE;
+		}
+
+		public static string GetClipboardText() {
+			return SDL.SDL_GetClipboardText();
+		}
+
+		public static void SetClipboardText(string text) {
+			SDL.SDL_SetClipboardText(text);
 		}
 
 		#endregion

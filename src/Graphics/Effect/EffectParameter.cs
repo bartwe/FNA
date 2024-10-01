@@ -92,7 +92,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		internal Texture texture;
 		internal string cachedString = string.Empty;
 
-		internal IntPtr values;
+		// bartwe: made public
+		public IntPtr values;
 		internal uint valuesSizeBytes;
 
 		internal IntPtr mojoType;
