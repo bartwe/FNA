@@ -2709,6 +2709,22 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
+		#region Clipboard Methods
+
+		public static bool HasClipboardText() {
+			return SDL.SDL_HasClipboardText() != 0;
+		}
+
+		public static string GetClipboardText() {
+			return SDL.SDL_GetClipboardText();
+		}
+
+		public static void SetClipboardText(string text) {
+			SDL.SDL_SetClipboardText(text);
+		}
+
+		#endregion
+
 		#region Private Static Win32 WM_PAINT Interop
 
 		private static SDL.SDL_EventFilter win32OnPaint = Win32OnPaint;

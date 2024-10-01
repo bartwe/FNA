@@ -36,7 +36,7 @@ namespace Microsoft.Xna.Framework
 			 * -flibit
 			 */
 
-			bool useSDL3 = Environment.GetEnvironmentVariable("FNA_PLATFORM_BACKEND") == "SDL3";
+			bool useSDL3 = true;// Environment.GetEnvironmentVariable("FNA_PLATFORM_BACKEND") == "SDL3";
 
 			if (useSDL3)
 			{
@@ -154,6 +154,10 @@ namespace Microsoft.Xna.Framework
 				SupportsOrientationChanges =	SDL3_FNAPlatform.SupportsOrientationChanges;
 				NeedsPlatformMainLoop = 	SDL3_FNAPlatform.NeedsPlatformMainLoop;
 				RunPlatformMainLoop =		SDL3_FNAPlatform.RunPlatformMainLoop;
+
+				HasClipboardText = SDL3_FNAPlatform.HasClipboardText;
+				GetClipboardText = SDL3_FNAPlatform.GetClipboardText;
+				SetClipboardText = SDL3_FNAPlatform.SetClipboardText;
 			}
 			else
 			{
@@ -209,6 +213,10 @@ namespace Microsoft.Xna.Framework
 				SupportsOrientationChanges =	SDL2_FNAPlatform.SupportsOrientationChanges;
 				NeedsPlatformMainLoop = 	SDL2_FNAPlatform.NeedsPlatformMainLoop;
 				RunPlatformMainLoop =		SDL2_FNAPlatform.RunPlatformMainLoop;
+
+				HasClipboardText = SDL2_FNAPlatform.HasClipboardText;
+				GetClipboardText = SDL2_FNAPlatform.GetClipboardText;
+				SetClipboardText = SDL2_FNAPlatform.SetClipboardText;
 			}
 
 			FNALoggerEXT.Initialize();
