@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,8 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Xna.Framework</RootNamespace>
     <AssemblyName>FNA</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
@@ -417,7 +416,7 @@
     <Compile Include="src\Vector3.cs" />
     <Compile Include="src\Vector4.cs" />
     <Compile Include="lib\SDL2-CS\src\SDL2.cs" />
-    <Compile Include="lib\SDL3-CS\SDL3\SDL3.cs" />
+    <Compile Include="lib\SDL3-CS\SDL3\SDL3.Legacy.cs" />
     <Compile Include="lib\FAudio\csharp\FAudio.cs" />
     <Compile Include="lib\Theorafile\csharp\Theorafile.cs" />
   </ItemGroup>
