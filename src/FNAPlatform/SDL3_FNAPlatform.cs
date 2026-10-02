@@ -565,6 +565,9 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 
+			// Wait for the size/position/fullscreen changes before querying bounds.
+			SDL.SDL_SyncWindow(sdlWindow);
+
 			// Update the mouse window bounds
 			if (Mouse.WindowHandle == window)
 			{
