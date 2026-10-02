@@ -344,7 +344,7 @@ namespace Microsoft.Xna.Framework.Content
 				);
 			}
 			ContentTypeReader typeReader = typeReaders[typeReaderIndex - 1];
-			T result = (T) typeReader.Read(this, default(T));
+			T result = (T) typeReader.Read(this, existingInstance);
 			RecordDisposable(result);
 			return result;
 		}
