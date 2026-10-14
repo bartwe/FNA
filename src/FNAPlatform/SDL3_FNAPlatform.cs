@@ -2724,7 +2724,7 @@ namespace Microsoft.Xna.Framework
 		#region Clipboard Methods
 
 		public static bool HasClipboardText() {
-			return SDL.SDL_HasClipboardText() != 0;
+			return SDL.SDL_HasClipboardText();
 		}
 
 		public static string GetClipboardText() {

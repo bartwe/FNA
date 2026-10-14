@@ -10,6 +10,8 @@
     <RootNamespace>Microsoft.Xna.Framework</RootNamespace>
     <AssemblyName>FNA</AssemblyName>
     <LangVersion>4</LangVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
